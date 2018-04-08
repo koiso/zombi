@@ -191,8 +191,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DatabaseHandler db = new DatabaseHandler(this);
-        db.addNode("address", "rssi", "nloc", "user");
+        // DatabaseHandler db = new DatabaseHandler(this);
+        // db.addNode("address", "rssi", "nloc", "user");
+        // db.updateNode("address", "rssi2", "nloc2", "user2");
 
         //Broadcastlisterner
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("JALAEVENTNAME"));
