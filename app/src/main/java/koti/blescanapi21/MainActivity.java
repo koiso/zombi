@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     String deviceAddress;
     TextView teksti;
+    int rssi;
 
     LocationFetch locationFetch;
     private String locN;
@@ -65,13 +67,21 @@ public class MainActivity extends AppCompatActivity {
             //Log.d("JALAJALA: ", result.toString());
             Log.d("JALAJALA: ", "ONSCANRESULT");
             BluetoothDevice bluetoothDevice = result.getDevice();
+            ScanRecord sr = result.getScanRecord();
+            rssi = result.getRssi();
 
             deviceAddress = bluetoothDevice.getAddress();
-            //String deviceName = bluetoothDevice.getName();
+            String deviceName = sr.getDeviceName();
 
-            //Log.d("JALAJALA", deviceName);
-            if (deviceAddress != null) {
-                asetaTeksti(deviceAddress);
+
+            if (deviceName != null) {
+                Log.d("JALAJALA", deviceName);
+            }
+            if (rssi != 0) {
+                Log.d("JALAJALA", String.valueOf(rssi));
+            }
+                if (deviceAddress != null) {
+                asetaTeksti(deviceAddress, rssi);
             }
             //Log.d("JALAJALA", deviceName);
         }
@@ -90,16 +100,16 @@ public class MainActivity extends AppCompatActivity {
     };
 
     //method to set MAC and location to textview
-    public void asetaTeksti(String deviceAddress) {
+    public void asetaTeksti(String deviceAddress, int rssi) {
         Log.d("JALAJALA ", deviceAddress);
         teksti = (TextView)findViewById(R.id.textView);
 
         if (teksti == null) {
-            teksti.setText("MAC: " + deviceAddress + "\nN: " + locN + "\nE: " + locE + "\n\n");
+            teksti.setText("MAC: " + deviceAddress + "\t" + rssi + "\nN: " + locN + "\nE: " + locE + "\n\n");
         }
         else {
             teksti.setText(teksti.getText(), TextView.BufferType.EDITABLE);
-            ((Editable) teksti.getText()).insert(0, "MAC: " + deviceAddress + "\nN: " + locN + "\nE: " + locE + "\n\n");
+            ((Editable) teksti.getText()).insert(0, "MAC: " + deviceAddress + "\t\t RSSI: " + rssi + "\nN: " + locN + "\nE: " + locE + "\n\n");
         }
     }
 
@@ -144,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
             startService(new Intent(this, LocationFetch.class));
 
 
-            scanLeDevice(enable);
+            //scanLeDevice(enable);
         }
 
         Button cameraButton = (Button) findViewById(R.id.button);
@@ -152,8 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                teksti.setText(" ");
-                scanLeDevice(enable);
+                    scanLeDevice(enable);
 
             }
         });
