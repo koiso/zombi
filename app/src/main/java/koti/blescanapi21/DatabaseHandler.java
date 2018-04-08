@@ -60,7 +60,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public List<Device> getDevices() {
         SQLiteDatabase db = this.getReadableDatabase();
-        List<Device> migraineList = new ArrayList<Migreeni>();
+        List<Device> deviceList = new ArrayList<Device>();
 
         String selectQuery = "SELECT * FROM " + TABLE_NAME + " ORDER BY id";
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -86,7 +86,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Log.d("USER", m_user);
 
 
-                migraineList.add(new Device(m_address, m_rssi,
+                deviceList.add(new Device(m_address, m_rssi,
                         m_nloc,
                         m_user);
                 cursor.moveToNext();
