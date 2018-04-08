@@ -272,6 +272,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void startMap(View view) {
+        Intent intententti = new Intent(this, MapsMarkerActivity.class);
+        startActivity(intententti);
+    }
+
 
 
 
