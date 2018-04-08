@@ -274,6 +274,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void startMap(View view) {
         Intent intententti = new Intent(this, MapsMarkerActivity.class);
+        Log.d("JALAJALACALL", String.valueOf(locN));
+        Log.d("JALAJALACALL", String.valueOf(locE));
+        intententti.putExtra("locN", locN);
+        intententti.putExtra("locE", locE);
         startActivity(intententti);
     }
 

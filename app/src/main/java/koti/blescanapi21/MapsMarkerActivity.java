@@ -4,6 +4,7 @@ package koti.blescanapi21;
  * Created by Proot on 8.4.2018.
  */
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
@@ -15,15 +16,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.R.layout;
+import android.util.Log;
 
 /**
  * An activity that displays a Google map with a marker (pin) to indicate a particular location.
  */
-public class MapsMarkerActivity  extends AppCompatActivity
-        implements OnMapReadyCallback {
+public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReadyCallback {
+
+    String locN;
+    String locE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Intent intententti = getIntent();
+        locN = intententti.getStringExtra("locN");
+        locE = intententti.getStringExtra("locE");
         super.onCreate(savedInstanceState);
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
@@ -51,13 +58,14 @@ public class MapsMarkerActivity  extends AppCompatActivity
 
         //get coordinates from database and add/upgrade tag to map
 
-        double locN = 65.031485;
-        double locE = 25.479929;
+        double locNN = Double.parseDouble(locN);
+        double locEE = Double.parseDouble(locE);
 
-        LatLng node1 = new LatLng(locN, locE);
+        //Log.d("JALAJALA", String.valueOf(locN));
+        //Log.d("JALAJALA", String.valueOf(locE));
+        LatLng node1 = new LatLng(locNN, locEE);
         googleMap.addMarker(new MarkerOptions()
                 .position(node1)
-
                 .title("Node1"));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(node1));
     }
