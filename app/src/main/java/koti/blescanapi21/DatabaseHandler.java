@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by mikes on 21.3.2018.
  */
@@ -32,8 +35,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String CREATION_TABLE = "CREATE TABLE Zombi ( "
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, address STRING, rssi STRING, nloc STRING, type " +
-                "STRING, user STRING )";
+                + "id INTEGER PRIMARY KEY AUTOINCREMENT, address STRING, rssi STRING,"  +
+                " nloc STRING, user STRING )";
 
         db.execSQL(CREATION_TABLE);
     }
@@ -44,23 +47,59 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         this.onCreate(db);
     }
 
-    public void addDevice(Device device) {
+    public boolean checkNodeExists(String address) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selectQuery = "SELECT count(*) FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        cursor.moveToFirst();
+        int count= cursor.getInt(0);
+        Log.i("count", Integer.toString(count));
+        cursor.close();
+
+        if (count > 0)
+            return true;
+
+        return false;
+    }
+
+    public void updateNode(String address, String rssi, String nloc, String user) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String updateQuery = "UPDATE " + TABLE_NAME + " SET rssi = '" + rssi + "', nloc = '" + nloc + "', user = '" + user + "'  WHERE address = '" + address + "'";
+
+        Cursor cursor= db.rawQuery(updateQuery, null);
+
+        cursor.moveToFirst();
+        cursor.close();
+
+        Log.i("DatabaseHandler", "Updated node");
+    }
+
+    public void addNode(String address, String rssi, String nloc, String user) {
+
+        // todo:
+        // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan, jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
+        ;
+        Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
+
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(ADDRESS, device.getAddress());
-        values.put(RSSI, device.getRssi());
-        values.put(NLOC, device.getPNloc());
-        values.put(USER, device.getUser());
+        values.put(ADDRESS, address);
+        values.put(RSSI, rssi);
+        values.put(NLOC, nloc);
+        values.put(USER, user);
 
         db.insert(TABLE_NAME,null, values);
         db.close();
 
-        Log.i("DatabaseHandler", "Added migraine");
+        Log.i("DatabaseHandler", "Added node");
     }
 
-    public List<Device> getDevices() {
+    public List<String> getNodes() {
         SQLiteDatabase db = this.getReadableDatabase();
-        List<Device> deviceList = new ArrayList<Device>();
+        List<String> deviceIdList = new ArrayList<String>();
 
         String selectQuery = "SELECT * FROM " + TABLE_NAME + " ORDER BY id";
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -86,14 +125,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Log.d("USER", m_user);
 
 
-                deviceList.add(new Device(m_address, m_rssi,
-                        m_nloc,
-                        m_user);
+                deviceIdList.add(m_id);
                 cursor.moveToNext();
             }
         }
 
-        return deviceList;
+        return deviceIdList;
     }
 
 }
