@@ -74,6 +74,8 @@ public class LocationFetch extends Service implements LocationListener {
 
                     if (gps_on) {
                         location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
                     } else {
                         location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     }

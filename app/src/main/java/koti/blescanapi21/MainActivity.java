@@ -14,6 +14,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Handler;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -24,7 +25,7 @@ import android.Manifest;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-
+import android.os.Build;
 
 import java.util.List;
 
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private final static long SCAN_PERIOD = 10000;
     private final static int REQUEST_ENABLE_BT = 1;
+    final static int BLUETOOTH_PERMISSION_REQUEST_CODE = 0;
 
     String deviceAddress;
     TextView teksti;
@@ -115,23 +117,23 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        //basic
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    protected void onResume() {
+        super.onResume();
 
-        //Broadcastlisterner
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("JALAEVENTNAME"));
-
-        BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        //if bt not enabled, ask to enable it
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
+
+            if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
+
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
+            } else {
+            }
+
+        }
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Intent enableGpsintent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(enableGpsintent);
         }
 
         //If there is no rights for location:
@@ -145,20 +147,98 @@ public class MainActivity extends AppCompatActivity {
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.'
 
-            Log.d("JALAJALA: ","LOC OIKEUS_CHECK");
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-
-        }
-        else {
+            Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
             Log.d("JALAJALA: ", "LOC OIKEUDET_ON");
             startService(new Intent(this, LocationFetch.class));
-
 
             //scanLeDevice(enable);
         }
 
-        Button cameraButton = (Button) findViewById(R.id.button);
-        cameraButton.setOnClickListener(new View.OnClickListener() {
+        Button button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                scanLeDevice(enable);
+
+            }
+        });
+    }
+        /*
+        // Ensures Bluetooth is enabled on the device.  If Bluetooth is not currently enabled,
+        // fire an intent to display a dialog asking the user to grant permission to enable it.
+        if (!mBluetoothAdapter.isEnabled()) {
+            if (!mBluetoothAdapter.isEnabled()) {
+                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+            }
+        }
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Intent enableGpsintent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(enableGpsintent);
+        }
+        // Initializes list view adapter.
+        scanLeDevice(enable);
+        }*/
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        //basic
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        //Broadcastlisterner
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("JALAEVENTNAME"));
+        BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        //if bt not enabled, ask to enable it
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
+
+            if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
+
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
+            }
+            else { }
+
+        }
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Intent enableGpsintent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(enableGpsintent);
+        }
+
+        //If there is no rights for location:
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding-
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.'
+
+            Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
+        else {
+            Log.d("JALAJALA: ", "LOC OIKEUDET_ON");
+            startService(new Intent(this, LocationFetch.class));
+
+            //scanLeDevice(enable);
+        }
+
+        Button button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
