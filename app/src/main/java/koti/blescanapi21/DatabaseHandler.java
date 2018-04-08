@@ -23,9 +23,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String ADDRESS = "address";
     private static final String RSSI = "rssi";
     private static final String NLOC = "nloc";
+    private static final String ELOC = "eloc";
     private static final String USER = "user";
 
-    private static final String[] COLUMNS = { KEY_ID, ADDRESS, RSSI, NLOC, USER };
+    private static final String[] COLUMNS = { KEY_ID, ADDRESS, RSSI, NLOC, ELOC, USER };
 
 
     public DatabaseHandler(Context context) {
@@ -36,7 +37,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         String CREATION_TABLE = "CREATE TABLE Zombi ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, address STRING, rssi STRING,"  +
-                " nloc STRING, user STRING )";
+                " nloc STRING, eloc STRING, user STRING )";
 
         db.execSQL(CREATION_TABLE);
     }
@@ -63,11 +64,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return false;
     }
 
-    public void updateNode(String address, String rssi, String nloc, String user) {
+    public void updateNode(String address, String rssi, String nloc, String eloc, String user) {
 
         SQLiteDatabase db = this.getWritableDatabase();
 
-        String updateQuery = "UPDATE " + TABLE_NAME + " SET rssi = '" + rssi + "', nloc = '" + nloc + "', user = '" + user + "'  WHERE address = '" + address + "'";
+        String updateQuery = "UPDATE " + TABLE_NAME + " SET rssi = '" + rssi + "', nloc = '" + nloc + "', eloc = '" + eloc + "', user = '" + user + "'  WHERE address = '" + address + "'";
 
         Cursor cursor= db.rawQuery(updateQuery, null);
 
@@ -77,7 +78,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.i("DatabaseHandler", "Updated node");
     }
 
-    public void addNode(String address, String rssi, String nloc, String user) {
+    public void addNode(String address, String rssi, String nloc, String eloc, String user) {
 
         // todo:
         // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan, jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
@@ -89,6 +90,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(ADDRESS, address);
         values.put(RSSI, rssi);
         values.put(NLOC, nloc);
+        values.put(ELOC, eloc);
         values.put(USER, user);
 
         db.insert(TABLE_NAME,null, values);
@@ -116,12 +118,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 String m_address = cursor.getString(cursor.getColumnIndex(ADDRESS));
                 String m_rssi = cursor.getString(cursor.getColumnIndex(RSSI));
                 String m_nloc = cursor.getString(cursor.getColumnIndex(NLOC));
+                String m_eloc = cursor.getString(cursor.getColumnIndex(ELOC));
                 String m_user = cursor.getString(cursor.getColumnIndex(USER));
 
                 Log.d("KEY_ID", m_id);
                 Log.d("ADDRESS", m_address);
                 Log.d("RSSI", m_rssi);
                 Log.d("NLOC", m_nloc);
+                Log.d("ELOC", m_eloc);
                 Log.d("USER", m_user);
 
 

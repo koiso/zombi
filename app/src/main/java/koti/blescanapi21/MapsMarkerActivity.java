@@ -18,6 +18,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import android.R.layout;
 import android.util.Log;
 
+import java.util.List;
+
 /**
  * An activity that displays a Google map with a marker (pin) to indicate a particular location.
  */
@@ -60,6 +62,14 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
 
         double locNN = Double.parseDouble(locN);
         double locEE = Double.parseDouble(locE);
+
+        //get nodes from database
+        DatabaseHandler db = new DatabaseHandler(this);
+        List <String> nodes = db.getNodes();
+
+        //for (String node:nodes){
+        //    node.
+        //}
 
         //Log.d("JALAJALA", String.valueOf(locN));
         //Log.d("JALAJALA", String.valueOf(locE));

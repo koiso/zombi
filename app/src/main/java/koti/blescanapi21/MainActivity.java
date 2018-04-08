@@ -103,6 +103,12 @@ public class MainActivity extends AppCompatActivity {
 
     //method to set MAC and location to textview
     public void asetaTeksti(String deviceAddress, int rssi) {
+        //insert to database
+        DatabaseHandler db = new DatabaseHandler(this);
+        db.addNode(deviceAddress, String.valueOf(rssi), locN, locE, "user");
+
+        // db.updateNode("address", "rssi2", "nloc2", "user2");
+
         Log.d("JALAJALA ", deviceAddress);
         teksti = (TextView)findViewById(R.id.textView);
 
