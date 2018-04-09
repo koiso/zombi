@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         //insert to database
         DatabaseHandler db = new DatabaseHandler(this);
         if (deviceAddress != null && locN != null && locE != null) {
-            db.addNode(deviceAddress, String.valueOf(rssi), locN, locE, "user");
+            db.addNode(deviceAddress, String.valueOf(rssi), String.valueOf(locN), String.valueOf(locE), "user");
         }
         // db.updateNode("address", "rssi2", "nloc2", "user2");
 

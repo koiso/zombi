@@ -71,7 +71,7 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
         DatabaseHandler db = new DatabaseHandler(this);
         List <String[]> nodes = db.getData();
 
-        if (nodes.isEmpty()){
+        if (nodes == null){
         }
         else {
             for (String[] node : nodes) {
@@ -79,6 +79,9 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
                 String title = node[0];
                 locNN = Double.parseDouble(node[1]);
                 locEE = Double.parseDouble(node[2]);
+
+                //double locNN = 62.25353;
+                //double locEE = 24.34342;
 
                 LatLng node1 = new LatLng(locNN, locEE);
                 googleMap.addMarker(new MarkerOptions()

@@ -35,6 +35,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
         String CREATION_TABLE = "CREATE TABLE Zombi ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, address STRING, rssi STRING,"  +
                 " nloc STRING, eloc STRING, user STRING )";
@@ -184,5 +185,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         return deviceIdList;
+    }
+
+    public void clearDatabase(String TABLE_NAME) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String clearDBQuery = "DELETE FROM "+TABLE_NAME;
+        db.execSQL(clearDBQuery);
     }
 }
