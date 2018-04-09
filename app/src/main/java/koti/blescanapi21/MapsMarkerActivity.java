@@ -18,6 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import android.R.layout;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,12 +28,15 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
 
     String locN;
     String locE;
+    double locNN;
+    double locEE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Intent intententti = getIntent();
         locN = intententti.getStringExtra("locN");
         locE = intententti.getStringExtra("locE");
+
         super.onCreate(savedInstanceState);
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
@@ -60,24 +64,36 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
 
         //get coordinates from database and add/upgrade tag to map
 
-        double locNN = Double.parseDouble(locN);
-        double locEE = Double.parseDouble(locE);
+        //double locNN = Double.parseDouble(locN);
+        //double locEE = Double.parseDouble(locE);
 
         //get nodes from database
         DatabaseHandler db = new DatabaseHandler(this);
-        List <String> nodes = db.getNodes();
+        List <String[]> nodes = db.getData();
 
+        if (nodes.isEmpty()){
+        }
+        else {
+            for (String[] node : nodes) {
+                Log.d("JALAJALA", Arrays.toString(node));
+                String title = node[0];
+                locNN = Double.parseDouble(node[1]);
+                locEE = Double.parseDouble(node[2]);
+
+                LatLng node1 = new LatLng(locNN, locEE);
+                googleMap.addMarker(new MarkerOptions()
+                        .position(node1)
+                        .title(title));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLng(node1));
+            }
+        }
         //for (String node:nodes){
         //    node.
         //}
 
         //Log.d("JALAJALA", String.valueOf(locN));
         //Log.d("JALAJALA", String.valueOf(locE));
-        LatLng node1 = new LatLng(locNN, locEE);
-        googleMap.addMarker(new MarkerOptions()
-                .position(node1)
-                .title("Node1"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(node1));
+
     }
 }
 

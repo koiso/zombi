@@ -137,4 +137,44 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return deviceIdList;
     }
 
+    public List<String[]> getData() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<String[]> deviceIdList = new ArrayList<String[]>();
+
+        //List<String> l1 = new ArrayList<>();
+
+        String selectQuery = "SELECT * FROM " + TABLE_NAME + " ORDER BY id";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // this is quick fix for bug which crashes if db is empty
+        if (cursor.getCount() == 0) {
+            return null;
+        }
+
+        if (cursor.moveToFirst()) {
+            while (!cursor.isAfterLast()) {
+
+                String m_id = cursor.getString(cursor.getColumnIndex(KEY_ID));
+                String m_address = cursor.getString(cursor.getColumnIndex(ADDRESS));
+                String m_rssi = cursor.getString(cursor.getColumnIndex(RSSI));
+                String m_nloc = cursor.getString(cursor.getColumnIndex(NLOC));
+                String m_eloc = cursor.getString(cursor.getColumnIndex(ELOC));
+                String m_user = cursor.getString(cursor.getColumnIndex(USER));
+
+                Log.d("KEY_ID", m_id);
+                Log.d("ADDRESS", m_address);
+                Log.d("RSSI", m_rssi);
+                Log.d("NLOC", m_nloc);
+                Log.d("ELOC", m_eloc);
+                Log.d("USER", m_user);
+
+                String[] l1 = {m_id, m_nloc, m_eloc};
+
+                deviceIdList.add(l1);
+                cursor.moveToNext();
+            }
+        }
+
+        return deviceIdList;
+    }
 }
