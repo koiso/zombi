@@ -57,8 +57,12 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("JALAJALA: ", "RECEIVER CHECK");
+
             locN = intent.getStringExtra("NLOC");
             locE = intent.getStringExtra("ELOC");
+
+            Log.d("JALAJALA: ", locN);
+            Log.d("JALAJALA: ", locE);
         }
     };
 
@@ -106,11 +110,12 @@ public class MainActivity extends AppCompatActivity {
     public void asetaTeksti(String deviceAddress, int rssi) {
         //insert to database
         DatabaseHandler db = new DatabaseHandler(this);
-        db.addNode(deviceAddress, String.valueOf(rssi), locN, locE, "user");
-
+        if (deviceAddress != null && locN != null && locE != null) {
+            db.addNode(deviceAddress, String.valueOf(rssi), locN, locE, "user");
+        }
         // db.updateNode("address", "rssi2", "nloc2", "user2");
 
-        Log.d("JALAJALA ", deviceAddress);
+        //Log.d("JALAJALA ", deviceAddress);
         teksti = (TextView)findViewById(R.id.textView);
 
         if (teksti == null) {

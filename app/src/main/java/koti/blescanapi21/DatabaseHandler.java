@@ -88,6 +88,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+
+        Log.d("DB_IN_ADDRESS", address);
+        Log.d("DB_IN_RSSI", rssi);
+        Log.d("DB_IN_NLOC", nloc);
+        Log.d("DB_IN_ELOC", eloc);
+        Log.d("DB_IN_USER", user);
+
         values.put(ADDRESS, address);
         values.put(RSSI, rssi);
         values.put(NLOC, nloc);
@@ -100,7 +107,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Log.i("DatabaseHandler", "Added node");
     }
 
-    public List<String> getNodes() {
+    /*public List<String> getNodes() {
         SQLiteDatabase db = this.getReadableDatabase();
         List<String> deviceIdList = new ArrayList<String>();
 
@@ -122,12 +129,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 String m_eloc = cursor.getString(cursor.getColumnIndex(ELOC));
                 String m_user = cursor.getString(cursor.getColumnIndex(USER));
 
-                Log.d("KEY_ID", m_id);
-                Log.d("ADDRESS", m_address);
-                Log.d("RSSI", m_rssi);
-                Log.d("NLOC", m_nloc);
-                Log.d("ELOC", m_eloc);
-                Log.d("USER", m_user);
+                Log.d("DB_OUT_KEY_ID", m_id);
+                Log.d("DB_OUT_ADDRESS", m_address);
+                Log.d("DB_OUT_RSSI", m_rssi);
+                Log.d("DB_OUT_NLOC", m_nloc);
+                Log.d("DB_OUT_ELOC", m_eloc);
+                Log.d("DB_OUT_USER", m_user);
 
 
                 deviceIdList.add(m_id);
@@ -136,7 +143,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         return deviceIdList;
-    }
+    }*/
 
     public List<String[]> getData() {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -162,12 +169,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 String m_eloc = cursor.getString(cursor.getColumnIndex(ELOC));
                 String m_user = cursor.getString(cursor.getColumnIndex(USER));
 
-                Log.d("KEY_ID", m_id);
-                Log.d("ADDRESS", m_address);
-                Log.d("RSSI", m_rssi);
-                Log.d("NLOC", m_nloc);
-                Log.d("ELOC", m_eloc);
-                Log.d("USER", m_user);
+                Log.d("DB_OUT_KEY_ID", m_id);
+                Log.d("DB_OUT_ADDRESS", m_address);
+                Log.d("DB_OUT_RSSI", m_rssi);
+                Log.d("DB_OUT_NLOC", m_nloc);
+                Log.d("DB_OUT_ELOC", m_eloc);
+                Log.d("DB_OUT_USER", m_user);
 
                 String[] l1 = {m_id, m_nloc, m_eloc};
 
