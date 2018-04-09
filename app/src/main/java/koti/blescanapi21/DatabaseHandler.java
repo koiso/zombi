@@ -168,7 +168,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 Log.d("DB_OUT_ELOC", m_eloc);
                 Log.d("DB_OUT_USER", m_user);
 
-                String[] l1 = {m_id, m_nloc, m_eloc};
+                String[] l1 = {m_id, m_nloc, m_eloc, m_address};
 
                 deviceIdList.add(l1);
                 cursor.moveToNext();

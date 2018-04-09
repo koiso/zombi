@@ -79,6 +79,7 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
                 String title = node[0];
                 locNN = Double.parseDouble(node[1]);
                 locEE = Double.parseDouble(node[2]);
+                String address = node[3];
 
                 //double locNN = 62.25353;
                 //double locEE = 24.34342;
@@ -86,6 +87,7 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
                 LatLng node1 = new LatLng(locNN, locEE);
                 googleMap.addMarker(new MarkerOptions()
                         .position(node1)
+                        .snippet(address)
                         .title(title));
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(node1));
             }
