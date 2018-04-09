@@ -35,7 +35,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
         String CREATION_TABLE = "CREATE TABLE Zombi ( "
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, address STRING, rssi STRING,"  +
                 " nloc STRING, eloc STRING, user STRING )";
@@ -56,12 +55,35 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
         cursor.moveToFirst();
         int count= cursor.getInt(0);
-        Log.i("count", Integer.toString(count));
-        cursor.close();
+        Log.i("nodecount", Integer.toString(count));
+        //cursor.close();
 
         if (count > 0)
             return true;
 
+        return false;
+    }
+
+    public boolean higherRSSI(String address, String rssi) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.getCount() == 0) {
+            return false;
+        }
+
+        if (cursor.moveToFirst()) {
+            int rssiOld = Integer.parseInt(cursor.getString(cursor.getColumnIndex(RSSI)));
+            int rssiNew = Integer.parseInt(rssi);
+            cursor.close();
+
+            if (rssiNew > rssiOld) {
+                Log.i("rssicheck", String.valueOf(rssiNew));
+                return true;
+            }
+            return false;
+        }
         return false;
     }
 
@@ -85,66 +107,35 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan,
         // jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
 
-        Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
+        if (!checkNodeExists(address)) {
 
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues values = new ContentValues();
 
-        Log.d("DB_IN_ADDRESS", address);
-        Log.d("DB_IN_RSSI", rssi);
-        Log.d("DB_IN_NLOC", nloc);
-        Log.d("DB_IN_ELOC", eloc);
-        Log.d("DB_IN_USER", user);
+            Log.d("DB_IN_ADDRESS", address);
+            Log.d("DB_IN_RSSI", rssi);
+            Log.d("DB_IN_NLOC", nloc);
+            Log.d("DB_IN_ELOC", eloc);
+            Log.d("DB_IN_USER", user);
 
-        values.put(ADDRESS, address);
-        values.put(RSSI, rssi);
-        values.put(NLOC, nloc);
-        values.put(ELOC, eloc);
-        values.put(USER, user);
+            values.put(ADDRESS, address);
+            values.put(RSSI, rssi);
+            values.put(NLOC, nloc);
+            values.put(ELOC, eloc);
+            values.put(USER, user);
 
-        db.insert(TABLE_NAME,null, values);
-        db.close();
+            db.insert(TABLE_NAME, null, values);
+            db.close();
 
-        Log.i("DatabaseHandler", "Added node");
-    }
-
-    /*public List<String> getNodes() {
-        SQLiteDatabase db = this.getReadableDatabase();
-        List<String> deviceIdList = new ArrayList<String>();
-
-        String selectQuery = "SELECT * FROM " + TABLE_NAME + " ORDER BY id";
-        Cursor cursor = db.rawQuery(selectQuery, null);
-
-        // this is quick fix for bug which crashes if db is empty
-        if (cursor.getCount() == 0) {
-            return null;
+            Log.i("DatabaseHandler", "Added node");
         }
-
-        if (cursor.moveToFirst()) {
-            while (!cursor.isAfterLast()) {
-
-                String m_id = cursor.getString(cursor.getColumnIndex(KEY_ID));
-                String m_address = cursor.getString(cursor.getColumnIndex(ADDRESS));
-                String m_rssi = cursor.getString(cursor.getColumnIndex(RSSI));
-                String m_nloc = cursor.getString(cursor.getColumnIndex(NLOC));
-                String m_eloc = cursor.getString(cursor.getColumnIndex(ELOC));
-                String m_user = cursor.getString(cursor.getColumnIndex(USER));
-
-                Log.d("DB_OUT_KEY_ID", m_id);
-                Log.d("DB_OUT_ADDRESS", m_address);
-                Log.d("DB_OUT_RSSI", m_rssi);
-                Log.d("DB_OUT_NLOC", m_nloc);
-                Log.d("DB_OUT_ELOC", m_eloc);
-                Log.d("DB_OUT_USER", m_user);
-
-
-                deviceIdList.add(m_id);
-                cursor.moveToNext();
+        else{
+            if (higherRSSI(address, rssi)) {
+                updateNode(address, rssi, nloc, eloc, user);
+                Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
             }
         }
-
-        return deviceIdList;
-    }*/
+    }
 
     public List<String[]> getData() {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -191,5 +182,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String clearDBQuery = "DELETE FROM "+TABLE_NAME;
         db.execSQL(clearDBQuery);
+    }
+
+    public boolean isDuplicate(String address){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE  = " + address + " ORDER BY id";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if (cursor.getCount() > 0) {
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }

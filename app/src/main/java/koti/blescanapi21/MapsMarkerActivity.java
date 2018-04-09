@@ -90,6 +90,8 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(node1));
             }
         }
+        db.close();
+
 
     }
 }
