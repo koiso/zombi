@@ -99,9 +99,9 @@ public class LocationFetch extends Service implements LocationListener {
         }
     }
 
-    public void onStart(Intent intent, int startID) {
-        super.onStart(intent, startID);
-    }
+    //public void onStart(Intent intent, int startID) {
+    //    super.onStart(intent, startID);
+    //}
 
     public int onStartCommand(Intent intent, int flags, int startID) {
         Log.d("JALAJALA", "LOCATIONFETCH_ONSTARTCOMMAND");

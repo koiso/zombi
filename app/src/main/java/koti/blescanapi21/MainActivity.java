@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private final static int REQUEST_ENABLE_BT = 1;
     final static int BLUETOOTH_PERMISSION_REQUEST_CODE = 0;
 
+
     String deviceAddress;
     TextView teksti;
     int rssi;
@@ -210,7 +211,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
 
             if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
-
                 ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
             }
             else { }
@@ -280,10 +280,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void startMap(View view) {
         Intent intententti = new Intent(this, MapsMarkerActivity.class);
-        Log.d("JALAJALACALL", String.valueOf(locN));
-        Log.d("JALAJALACALL", String.valueOf(locE));
-        intententti.putExtra("locN", locN);
-        intententti.putExtra("locE", locE);
+        //Log.d("JALAJALACALL", String.valueOf(locN));
+        //Log.d("JALAJALACALL", String.valueOf(locE));
+        //intententti.putExtra("locN", locN);
+        //intententti.putExtra("locE", locE);
         startActivity(intententti);
     }
 

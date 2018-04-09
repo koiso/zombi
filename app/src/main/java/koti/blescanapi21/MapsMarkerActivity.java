@@ -26,16 +26,16 @@ import java.util.List;
  */
 public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReadyCallback {
 
-    String locN;
-    String locE;
+    //String locN;
+    //String locE;
     double locNN;
     double locEE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Intent intententti = getIntent();
-        locN = intententti.getStringExtra("locN");
-        locE = intententti.getStringExtra("locE");
+        //Intent intententti = getIntent();
+        //locN = intententti.getStringExtra("locN");
+        //locE = intententti.getStringExtra("locE");
 
         super.onCreate(savedInstanceState);
         // Retrieve the content view that renders the map.
@@ -87,12 +87,6 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(node1));
             }
         }
-        //for (String node:nodes){
-        //    node.
-        //}
-
-        //Log.d("JALAJALA", String.valueOf(locN));
-        //Log.d("JALAJALA", String.valueOf(locE));
 
     }
 }

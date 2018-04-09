@@ -81,8 +81,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void addNode(String address, String rssi, String nloc, String eloc, String user) {
 
         // todo:
-        // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan, jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
-        ;
+        // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan,
+        // jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
+
         Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
 
         SQLiteDatabase db = this.getWritableDatabase();
