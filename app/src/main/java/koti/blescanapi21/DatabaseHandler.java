@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteTransactionListener;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.List;
  * Created by mikes on 21.3.2018.
  */
 
-public class DatabaseHandler extends SQLiteOpenHelper {
+public class DatabaseHandler extends SQLiteOpenHelper implements SQLiteTransactionListener {
 
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "ZombiDb";
@@ -31,6 +32,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    @Override
+    public void onBegin(){
+
+    }
+    @Override
+    public void onCommit(){
+        Log.d("JALAJALA", "LISTENERONCOMMIT");
+    }
+
+    @Override
+    public void onRollback(){
+
     }
 
     @Override
@@ -141,8 +156,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         List<String[]> deviceIdList = new ArrayList<String[]>();
 
-        //List<String> l1 = new ArrayList<>();
-
         String selectQuery = "SELECT * FROM " + TABLE_NAME + " ORDER BY id";
         Cursor cursor = db.rawQuery(selectQuery, null);
 
@@ -176,9 +189,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 cursor.moveToNext();
             }
         }
-
+        db.close();
         return deviceIdList;
     }
+
 
     public void clearDatabase(String TABLE_NAME) {
         SQLiteDatabase db = this.getWritableDatabase();

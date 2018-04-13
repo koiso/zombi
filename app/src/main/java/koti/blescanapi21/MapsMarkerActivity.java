@@ -44,7 +44,6 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
     String locE;
     double locNN;
     double locEE;
-    LocationFetch locationFetch;
 
     private BluetoothAdapter mBluetoothAdapter;
     private LocationManager locationManager;
@@ -52,8 +51,8 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
     private final static int REQUEST_ENABLE_BT = 1;
     final static int BLUETOOTH_PERMISSION_REQUEST_CODE = 0;
 
-    List <String[]> nodes;
-
+    private GoogleMap googlemap;
+    DatabaseHandler db = new DatabaseHandler(this);
 
 
     @Override
@@ -168,6 +167,8 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Log.d("JALAJALA", "ONMAPREADY");
+        googlemap = googleMap;
         // Add a marker in Sydney, Australia,
         // and move the map's camera to the same location.
         //LatLng sydney = new LatLng(-33.852, 151.211);
@@ -178,7 +179,8 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
         //double locEE = Double.parseDouble(locE);
 
         //get nodes from database
-        DatabaseHandler db = new DatabaseHandler(this);
+        //DatabaseHandler db = new DatabaseHandler(this);
+        List <String[]> nodes;
         nodes = db.getData();
 
         if (nodes == null){
@@ -204,9 +206,43 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(node1));
             }
         }
-        db.close();
-
-
+        //db.close();
     }
-}
 
+    //Metodin idea on lukea db.getData():lla tuoreimmat arvot ja verrata aiempiin onMapReadyssä() luettuihin
+    //vertaa arvojen määrä nodes listoissa, jos isompi tässä, lue viimeiset ja paiskaa kartalle, päivitä nodes
+    //tällä hetkellä metodia kutsutaan locationfetchin onlocationchangessa, eli aina ku gps arvot muuttuu
+    //siksi, että samalla voidaan passata gps koordinaatit tänne jotta kartta seuraa
+    public void upgradeMap(){
+        Log.d("JALAJALA", "ONUPGRADEMAP");
+
+        //tama rivi rikkoo, nullpointerjadajaa - MIKSI?!?!?
+        List<String[]> nodes2;
+        nodes2 = db.getData();
+
+        if (nodes2 == null){
+        }
+        else {
+            for (String[] node2 : nodes2) {
+
+                //Log.d("JALAJALA", Arrays.toString(node));
+
+                String title = node2[0];
+                locNN = Double.parseDouble(node2[1]);
+                locEE = Double.parseDouble(node2[2]);
+                String address = node2[3];
+
+                //double locNN = 62.25353;
+                //double locEE = 24.34342;
+
+                LatLng node1 = new LatLng(locNN, locEE);
+                googlemap.addMarker(new MarkerOptions()
+                        .position(node1)
+                        .snippet(address)
+                        .title(title));
+                googlemap.moveCamera(CameraUpdateFactory.newLatLng(node1));
+            }
+        }
+    }
+
+}
