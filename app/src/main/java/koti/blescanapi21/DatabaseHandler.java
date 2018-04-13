@@ -15,7 +15,7 @@ import java.util.List;
  * Created by mikes on 21.3.2018.
  */
 
-public class DatabaseHandler extends SQLiteOpenHelper implements SQLiteTransactionListener {
+public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "ZombiDb";
@@ -32,20 +32,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements SQLiteTransacti
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-    }
-
-    @Override
-    public void onBegin(){
-
-    }
-    @Override
-    public void onCommit(){
-        Log.d("JALAJALA", "LISTENERONCOMMIT");
-    }
-
-    @Override
-    public void onRollback(){
-
     }
 
     @Override
