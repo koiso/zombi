@@ -4,8 +4,20 @@ package koti.blescanapi21;
  * Created by Proot on 8.4.2018.
  */
 
+import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -17,6 +29,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.R.layout;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,10 +40,21 @@ import java.util.List;
  */
 public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReadyCallback {
 
-    //String locN;
-    //String locE;
+    String locN;
+    String locE;
     double locNN;
     double locEE;
+    LocationFetch locationFetch;
+
+    private BluetoothAdapter mBluetoothAdapter;
+    private LocationManager locationManager;
+
+    private final static int REQUEST_ENABLE_BT = 1;
+    final static int BLUETOOTH_PERMISSION_REQUEST_CODE = 0;
+
+    List <String[]> nodes;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,13 +64,98 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
 
         super.onCreate(savedInstanceState);
         // Retrieve the content view that renders the map.
+
         setContentView(R.layout.activity_maps);
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        //if bt not enabled, ask to enable it
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
+
+            if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
+            }
+            else { }
+
+        }
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Intent enableGpsintent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(enableGpsintent);
+        }
+
+        //If there is no rights for location:
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
+        else {
+            Log.d("JALAJALA: ", "LOC OIKEUDET_ON");
+            startService(new Intent(this, LocationFetch.class));
+            startService(new Intent(this, BleScanner.class));
+
+            //if we want to start scanning right away
+            //scanLeDevice(enable);
+        }
+
+/*        //OLD MAIN BUTTON, USE LATER FOR LIST THE CONTENT OF DB IF POSSIBLE
+        Button button = (Button) findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                for (String[] node : nodes) {
+                    Log.d("JALAJALA", Arrays.toString(node));
+                }
+
+            }
+        });*/
     }
+
+    protected void onResume() {
+        super.onResume();
+
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
+
+            if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
+
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
+            } else {
+            }
+
+        }
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Intent enableGpsintent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(enableGpsintent);
+        }
+
+        //If there is no rights for location:
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
+            Log.d("JALAJALA: ", "LOC OIKEUDET_ON");
+            startService(new Intent(this, LocationFetch.class));
+
+        }
+    }
+
 
     /**
      * Manipulates the map when it's available.
@@ -69,13 +179,15 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
 
         //get nodes from database
         DatabaseHandler db = new DatabaseHandler(this);
-        List <String[]> nodes = db.getData();
+        nodes = db.getData();
 
         if (nodes == null){
         }
         else {
             for (String[] node : nodes) {
-                Log.d("JALAJALA", Arrays.toString(node));
+
+                //Log.d("JALAJALA", Arrays.toString(node));
+
                 String title = node[0];
                 locNN = Double.parseDouble(node[1]);
                 locEE = Double.parseDouble(node[2]);

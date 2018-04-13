@@ -55,7 +55,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
         cursor.moveToFirst();
         int count= cursor.getInt(0);
-        Log.i("nodecount", Integer.toString(count));
+        Log.i("NodeCountInDb", Integer.toString(count));
+        //Log.d("JALAJALA","CHECKNODE");
         //cursor.close();
 
         if (count > 0)
@@ -103,7 +104,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void addNode(String address, String rssi, String nloc, String eloc, String user) {
 
-        // todo:
         // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan,
         // jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
 
@@ -161,12 +161,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 String m_eloc = cursor.getString(cursor.getColumnIndex(ELOC));
                 String m_user = cursor.getString(cursor.getColumnIndex(USER));
 
+                /*
                 Log.d("DB_OUT_KEY_ID", m_id);
                 Log.d("DB_OUT_ADDRESS", m_address);
                 Log.d("DB_OUT_RSSI", m_rssi);
                 Log.d("DB_OUT_NLOC", m_nloc);
                 Log.d("DB_OUT_ELOC", m_eloc);
                 Log.d("DB_OUT_USER", m_user);
+                */
 
                 String[] l1 = {m_id, m_nloc, m_eloc, m_address};
 
