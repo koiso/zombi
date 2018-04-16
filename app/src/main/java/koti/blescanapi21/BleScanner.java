@@ -58,7 +58,7 @@ public class BleScanner extends Service {
 
         super.onStartCommand(intent, flags, startID);
         scanLeDevice(enable);
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     public void onDestroy() {

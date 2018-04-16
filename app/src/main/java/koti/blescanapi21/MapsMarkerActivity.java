@@ -26,7 +26,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.R.layout;
@@ -41,7 +43,7 @@ import java.util.List;
 /**
  * An activity that displays a Google map with a marker (pin) to indicate a particular location.
  */
-public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener {
+public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener, ActivityCompat.OnRequestPermissionsResultCallback {
 
     String locN;
     String locE;
@@ -56,7 +58,10 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
     private static GoogleMap map;
     private static Context context;
-
+    private static List<String[]> nodes;
+    private static String[] node;
+    private static int koko;
+    private static int markersize = 0;
 
 
     @Override
@@ -104,6 +109,8 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
             Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            startService(new Intent(this, LocationFetch.class));
+            startService(new Intent(this, BleScanner.class));
         } else {
             //start services for location and ble info.
             //location passes loc parameters to ble which passes them to db.
@@ -153,8 +160,8 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         } else {
             Log.d("JALAJALA: ", "LOC OIKEUDET_ON");
-            startService(new Intent(this, LocationFetch.class));
-
+            //startService(new Intent(this, LocationFetch.class));
+            //startService(new Intent(this, BleScanner.class));
         }
     }
 
@@ -172,45 +179,41 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     public void onMapReady(GoogleMap googlemap) {
         Log.d("JALAJALA", "ONMAPREADY");
         map = googlemap;
-        DatabaseHandler db = new DatabaseHandler(this);
-        // Add a marker in Sydney, Australia,
-        // and move the map's camera to the same location.
-        //LatLng sydney = new LatLng(-33.852, 151.211);
 
-        //get coordinates from database and add/upgrade tag to map
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
+            } else {
+            }
+            return;
+        }
+
+        map.setMyLocationEnabled(true);
+        map.setOnMyLocationButtonClickListener(this);
+
+        final DatabaseHandler db = new DatabaseHandler(this);
 
         //double locNN = Double.parseDouble(locN);
         //double locEE = Double.parseDouble(locE);
 
         //get nodes from database
         //DatabaseHandler db = new DatabaseHandler(this);
-        List<String[]> nodes;
         nodes = db.getData();
 
         if (nodes == null) {
-        } else {
+        }
+        else {
             for (String[] node : nodes) {
 
                 Log.d("JALAJALA", Arrays.toString(node));
-
 
                 String title = node[0];
                 locNN = Double.parseDouble(node[1]);
                 locEE = Double.parseDouble(node[2]);
                 String address = node[3];
 
-                //double locNN = 62.25353;
-                //double locEE = 24.34342;
 
-                //set location
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-                map.setMyLocationEnabled(true);
-                map.setOnMyLocationButtonClickListener(this);
-
-
+                //set markers from db
                 LatLng node1 = new LatLng(locNN, locEE);
                 map.addMarker(new MarkerOptions()
                         .position(node1)
@@ -219,8 +222,18 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 map.moveCamera(CameraUpdateFactory.newLatLng(node1));
             }
         }
+        map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                String title = marker.getTitle();
+                marker.remove();
+                db.removeNode(title);
+                return true;
+            }
+        });
         db.close();
     }
+
 
     @Override
     public boolean onMyLocationButtonClick() {
@@ -230,42 +243,86 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         return false;
     }
 
-
     //Metodin idea on lukea db.getData():lla tuoreimmat arvot ja verrata aiempiin onMapReadyssä() luettuihin
     //vertaa arvojen määrä nodes listoissa, jos isompi tässä, lue viimeiset ja paiskaa / korvaa (jos update) kartalle, päivitä nodes seuraavaan lukuun
     //tällä hetkellä metodia kutsutaan locationfetchin onlocationchangessa, eli aina ku gps arvot muuttuu
     //siksi, että samalla voidaan passata gps koordinaatit tänne jotta kartta seuraa
     //vois tieten olla viisaampaa tehdä databasehandlerissa...
-
-    public static void upgradeMap(){
-        Log.d("JALAJALA", "ONUPGRADEMAP");
+    public static void addNewNode(){
         DatabaseHandler db = new DatabaseHandler(MapsMarkerActivity.context);
-
-        //tama rivi rikkoo, nullpointerjadajaa - MIKSI?!?!?
         List<String[]> nodes2;
         nodes2 = db.getData();
 
-        if (nodes2 == null){
+        //jossei haettu ole tyhjä
+        if (nodes2 != null) {
+
+            //hax jos vanha taulu on tyhja --> oletuskoko
+            if (nodes == null) {
+                int koko = 0;
+            }
+            else {
+                int koko = nodes.size();
+            }
+            //jos tauluun lisätty nodeja, päivitetään map (vain näillä nodeilla)
+            if(nodes2.size() > koko) {
+
+                //aloitetaan uuden taulun kahlaus indeksistä vanhan taulun koko ja jatketaan taulun loppuun
+                for (int apu = koko; apu < nodes2.size(); apu++) {
+                    Log.d("JALAJALA", "ADD_NEW_NODE");
+
+                    String[] node2 = nodes2.get(apu);
+                    String title = node2[0];
+                    locNN = Double.parseDouble(node2[1]);
+                    locEE = Double.parseDouble(node2[2]);
+                    String address = node2[3];
+
+
+                    Log.d("JALAJALA", String.valueOf(node2[3]));
+
+                    LatLng merkki = new LatLng(locNN, locEE);
+                    map.addMarker(new MarkerOptions()
+                            .position(merkki)
+                            .snippet(address)
+                            .title(title)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                    map.moveCamera(CameraUpdateFactory.newLatLng(merkki));
+                }
+             }
+            nodes = nodes2;
         }
-        else {
-            for (String[] node2 : nodes2) {
+    }
 
-                Log.d("JALAJALA", Arrays.toString(node2));
+    //public static void upgradeCoordinates(String id, String nloc, String eloc, String address) {
+    public static void updateLocation() {
+    //taulussa sama määrä nodeja, tarkastesetaan onko sijaintia korjattu ja päivitetään map
+        Log.d("JALAJALA", "UPDATE_NODE_LOCATION_ON_MAP");
+        map.clear();
+        DatabaseHandler db = new DatabaseHandler(MapsMarkerActivity.context);
+        List<String[]> nodes3;
+        nodes3 = db.getData();
+        for (String[] node3 : nodes3) {
+            for (String[] node : nodes) {
+                if (node3 != node) {
+                    //String[] node3 = nodes3.get(Integer.parseInt(id));
+                    //Log.d("JALAJALA", Arrays.toString(node2));
 
-                String title = node2[0];
-                locNN = Double.parseDouble(node2[1]);
-                locEE = Double.parseDouble(node2[2]);
-                String address = node2[3];
+                    /*String title = id;
+                    locNN = Double.parseDouble(nloc);
+                    locEE = Double.parseDouble(eloc);
+                    //String address = node3[3];*/
+                    String title = node3[0];
+                    locNN = Double.parseDouble(node3[1]);
+                    locEE = Double.parseDouble(node3[2]);
+                    String address = node3[3];
 
-                //double locNN = 62.25353;
-                //double locEE = 24.34342;
-
-                LatLng node1 = new LatLng(locNN, locEE);
-                map.addMarker(new MarkerOptions()
-                        .position(node1)
-                        .snippet(address)
-                        .title(title));
-                map.moveCamera(CameraUpdateFactory.newLatLng(node1));
+                    LatLng merkki3 = new LatLng(locNN, locEE);
+                    map.addMarker(new MarkerOptions()
+                            .position(merkki3)
+                            .snippet(address)
+                            .title(title)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+                    map.moveCamera(CameraUpdateFactory.newLatLng(merkki3));
+                }
             }
         }
     }

@@ -76,22 +76,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.close();
             return false;
         }
+        cursor.moveToFirst();
+         int rssiOld = Integer.parseInt(cursor.getString(cursor.getColumnIndex(RSSI)));
+         int rssiNew = Integer.parseInt(rssi);
+         cursor.close();
+         db.close();
 
-        if (cursor.moveToFirst()) {
-            int rssiOld = Integer.parseInt(cursor.getString(cursor.getColumnIndex(RSSI)));
-            int rssiNew = Integer.parseInt(rssi);
-            cursor.close();
-            db.close();
-
-            if (rssiNew > rssiOld) {
-                Log.i("rssicheck", String.valueOf(rssiNew));
-                return true;
-            }
-            return false;
+        if (rssiNew > rssiOld) {
+            Log.i("rssicheck", String.valueOf(rssiNew) + " --> " + String.valueOf(rssiOld));
+            return true;
         }
-        cursor.close();
-        db.close();
         return false;
+
+
     }
 
     public void updateNode(String address, String rssi, String nloc, String eloc, String user) {
@@ -100,13 +97,35 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         String updateQuery = "UPDATE " + TABLE_NAME + " SET rssi = '" + rssi + "', nloc = '" + nloc + "', eloc = '" + eloc + "', user = '" + user + "'  WHERE address = '" + address + "'";
 
-        Cursor cursor= db.rawQuery(updateQuery, null);
-
+        Cursor cursor = db.rawQuery(updateQuery, null);
         cursor.moveToFirst();
         cursor.close();
         db.close();
 
-        Log.i("DatabaseHandler", "Updated node");
+        //get id
+        SQLiteDatabase db2 = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
+        Cursor cursor2 = db2.rawQuery(selectQuery, null);
+        cursor2.moveToFirst();
+        String m_id = cursor2.getString(cursor2.getColumnIndex(KEY_ID));
+        //int m_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID)));
+
+        cursor2.close();
+        db2.close();
+
+        //String selectQuery = "SELECT id FROM " + TABLE_NAME + " WHERE address = " + address;
+        //Cursor cursor2 = db.rawQuery(selectQuery, null);
+
+        //cursor.moveToFirst();
+
+        //String m_id = cursor.getString(cursor.getColumnIndex(KEY_ID));
+
+        //MapsMarkerActivity.upgradeCoordinates(m_id, nloc, eloc, address);
+        MapsMarkerActivity.updateLocation();
+        //cursor2.close();
+        db.close();
+
+        Log.i("DatabaseHandler", "Coordinates updated to DB (RSSI)");
     }
 
     public void addNode(String address, String rssi, String nloc, String eloc, String user) {
@@ -134,12 +153,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.insert(TABLE_NAME, null, values);
             db.close();
 
-            Log.i("DatabaseHandler", "Added node");
+            MapsMarkerActivity.addNewNode();
+            Log.i("DatabaseHandler", "Added new node node to DB");
         }
         else{
             if (higherRSSI(address, rssi)) {
                 updateNode(address, rssi, nloc, eloc, user);
-                Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
+                //Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
             }
         }
     }
@@ -186,6 +206,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return deviceIdList;
     }
 
+
+    public void removeNode(String id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String removeDBQuery =  "DELETE FROM " + TABLE_NAME + " WHERE id = '" + id + "'";
+        db.execSQL(removeDBQuery);
+        db.close();
+    }
 
     public void clearDatabase(String TABLE_NAME) {
         SQLiteDatabase db = this.getWritableDatabase();

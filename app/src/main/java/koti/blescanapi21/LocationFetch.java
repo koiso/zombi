@@ -108,7 +108,7 @@ public class LocationFetch extends Service implements LocationListener {
     public int onStartCommand(Intent intent, int flags, int startID) {
         Log.d("JALAJALA", "LOCATIONFETCH_ONSTARTCOMMAND");
         super.onStartCommand(intent, flags, startID);
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     public void onDestroy() {
@@ -151,8 +151,7 @@ public class LocationFetch extends Service implements LocationListener {
         //kutsuu mapin upgradea joka hakee kannasta uuden paikan(update) /tai uuden noden (jos on).
         //todo: passataan myös nykyinen loc mapille...
         //MapsMarkerActivity maps = new MapsMarkerActivity();
-
-        MapsMarkerActivity.upgradeMap();
+        //MapsMarkerActivity.upgradeMap();
 
     }
 
