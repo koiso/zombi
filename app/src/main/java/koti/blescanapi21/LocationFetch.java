@@ -146,9 +146,14 @@ public class LocationFetch extends Service implements LocationListener {
         Log.d("JALA", message);
         NLOC = String.valueOf(location.getLatitude());
         ELOC = String.valueOf(location.getLongitude());
-        MapsMarkerActivity maps = new MapsMarkerActivity();
-        maps.upgradeMap();
         sendResults();
+
+        //kutsuu mapin upgradea joka hakee kannasta uuden paikan(update) /tai uuden noden (jos on).
+        //todo: passataan myös nykyinen loc mapille...
+        //MapsMarkerActivity maps = new MapsMarkerActivity();
+
+        MapsMarkerActivity.upgradeMap();
+
     }
 
     public void onProviderDisabled(String provider) {

@@ -12,10 +12,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +33,7 @@ import android.R.layout;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.List;
@@ -38,12 +41,12 @@ import java.util.List;
 /**
  * An activity that displays a Google map with a marker (pin) to indicate a particular location.
  */
-public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener {
 
     String locN;
     String locE;
-    double locNN;
-    double locEE;
+    private static double locNN;
+    private static double locEE;
 
     private BluetoothAdapter mBluetoothAdapter;
     private LocationManager locationManager;
@@ -51,8 +54,9 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
     private final static int REQUEST_ENABLE_BT = 1;
     final static int BLUETOOTH_PERMISSION_REQUEST_CODE = 0;
 
-    private GoogleMap googlemap;
-    DatabaseHandler db = new DatabaseHandler(this);
+    private static GoogleMap map;
+    private static Context context;
+
 
 
     @Override
@@ -60,31 +64,33 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
         //Intent intententti = getIntent();
         //locN = intententti.getStringExtra("locN");
         //locE = intententti.getStringExtra("locE");
+        MapsMarkerActivity.context = getApplicationContext();
 
         super.onCreate(savedInstanceState);
-        // Retrieve the content view that renders the map.
 
+        // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
+
         // Get the SupportMapFragment and request notification
         // when the map is ready to be used.
-
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        //create crap for permissions
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
-        //if bt not enabled, ask to enable it
+        //if bt not enabled, ask to enable it - and so on...
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
 
             if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
                 ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
+            } else {
             }
-            else { }
 
         }
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -98,15 +104,13 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
 
             Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-
-        else {
+        } else {
+            //start services for location and ble info.
+            //location passes loc parameters to ble which passes them to db.
             Log.d("JALAJALA: ", "LOC OIKEUDET_ON");
             startService(new Intent(this, LocationFetch.class));
             startService(new Intent(this, BleScanner.class));
 
-            //if we want to start scanning right away
-            //scanLeDevice(enable);
         }
 
 /*        //OLD MAIN BUTTON, USE LATER FOR LIST THE CONTENT OF DB IF POSSIBLE
@@ -131,7 +135,6 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
             startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
 
             if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
-
                 ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
             } else {
             }
@@ -166,9 +169,10 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(GoogleMap googlemap) {
         Log.d("JALAJALA", "ONMAPREADY");
-        googlemap = googleMap;
+        map = googlemap;
+        DatabaseHandler db = new DatabaseHandler(this);
         // Add a marker in Sydney, Australia,
         // and move the map's camera to the same location.
         //LatLng sydney = new LatLng(-33.852, 151.211);
@@ -180,15 +184,15 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
 
         //get nodes from database
         //DatabaseHandler db = new DatabaseHandler(this);
-        List <String[]> nodes;
+        List<String[]> nodes;
         nodes = db.getData();
 
-        if (nodes == null){
-        }
-        else {
+        if (nodes == null) {
+        } else {
             for (String[] node : nodes) {
 
-                //Log.d("JALAJALA", Arrays.toString(node));
+                Log.d("JALAJALA", Arrays.toString(node));
+
 
                 String title = node[0];
                 locNN = Double.parseDouble(node[1]);
@@ -198,23 +202,44 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
                 //double locNN = 62.25353;
                 //double locEE = 24.34342;
 
+                //set location
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                map.setMyLocationEnabled(true);
+                map.setOnMyLocationButtonClickListener(this);
+
+
                 LatLng node1 = new LatLng(locNN, locEE);
-                googleMap.addMarker(new MarkerOptions()
+                map.addMarker(new MarkerOptions()
                         .position(node1)
                         .snippet(address)
                         .title(title));
-                googleMap.moveCamera(CameraUpdateFactory.newLatLng(node1));
+                map.moveCamera(CameraUpdateFactory.newLatLng(node1));
             }
         }
-        //db.close();
+        db.close();
     }
 
+    @Override
+    public boolean onMyLocationButtonClick() {
+        Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
+        // Return false so that we don't consume the event and the default behavior still occurs
+        // (the camera animates to the user's current position).
+        return false;
+    }
+
+
     //Metodin idea on lukea db.getData():lla tuoreimmat arvot ja verrata aiempiin onMapReadyssä() luettuihin
-    //vertaa arvojen määrä nodes listoissa, jos isompi tässä, lue viimeiset ja paiskaa kartalle, päivitä nodes
+    //vertaa arvojen määrä nodes listoissa, jos isompi tässä, lue viimeiset ja paiskaa / korvaa (jos update) kartalle, päivitä nodes seuraavaan lukuun
     //tällä hetkellä metodia kutsutaan locationfetchin onlocationchangessa, eli aina ku gps arvot muuttuu
     //siksi, että samalla voidaan passata gps koordinaatit tänne jotta kartta seuraa
-    public void upgradeMap(){
+    //vois tieten olla viisaampaa tehdä databasehandlerissa...
+
+    public static void upgradeMap(){
         Log.d("JALAJALA", "ONUPGRADEMAP");
+        DatabaseHandler db = new DatabaseHandler(MapsMarkerActivity.context);
 
         //tama rivi rikkoo, nullpointerjadajaa - MIKSI?!?!?
         List<String[]> nodes2;
@@ -225,7 +250,7 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
         else {
             for (String[] node2 : nodes2) {
 
-                //Log.d("JALAJALA", Arrays.toString(node));
+                Log.d("JALAJALA", Arrays.toString(node2));
 
                 String title = node2[0];
                 locNN = Double.parseDouble(node2[1]);
@@ -236,13 +261,17 @@ public class MapsMarkerActivity  extends AppCompatActivity implements OnMapReady
                 //double locEE = 24.34342;
 
                 LatLng node1 = new LatLng(locNN, locEE);
-                googlemap.addMarker(new MarkerOptions()
+                map.addMarker(new MarkerOptions()
                         .position(node1)
                         .snippet(address)
                         .title(title));
-                googlemap.moveCamera(CameraUpdateFactory.newLatLng(node1));
+                map.moveCamera(CameraUpdateFactory.newLatLng(node1));
             }
         }
     }
 
+    @Override
+    public void onPointerCaptureChanged(boolean hasCapture) {
+
+    }
 }

@@ -46,7 +46,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        this.onCreate(db);
+        //this.onCreate(db);
     }
 
     public boolean checkNodeExists(String address) {
@@ -72,6 +72,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.getCount() == 0) {
+            cursor.close();
+            db.close();
             return false;
         }
 
@@ -79,6 +81,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             int rssiOld = Integer.parseInt(cursor.getString(cursor.getColumnIndex(RSSI)));
             int rssiNew = Integer.parseInt(rssi);
             cursor.close();
+            db.close();
 
             if (rssiNew > rssiOld) {
                 Log.i("rssicheck", String.valueOf(rssiNew));
@@ -86,6 +89,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
             return false;
         }
+        cursor.close();
+        db.close();
         return false;
     }
 
@@ -99,6 +104,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         cursor.moveToFirst();
         cursor.close();
+        db.close();
 
         Log.i("DatabaseHandler", "Updated node");
     }
@@ -175,6 +181,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 cursor.moveToNext();
             }
         }
+        cursor.close();
         db.close();
         return deviceIdList;
     }
