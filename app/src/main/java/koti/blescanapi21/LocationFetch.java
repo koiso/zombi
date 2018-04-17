@@ -148,10 +148,9 @@ public class LocationFetch extends Service implements LocationListener {
         ELOC = String.valueOf(location.getLongitude());
         sendResults();
 
-        //kutsuu mapin upgradea joka hakee kannasta uuden paikan(update) /tai uuden noden (jos on).
-        //todo: passataan myös nykyinen loc mapille...
         //MapsMarkerActivity maps = new MapsMarkerActivity();
         //MapsMarkerActivity.upgradeMap();
+        MapsMarkerActivity.updateOwnLocation(NLOC, ELOC);
 
     }
 

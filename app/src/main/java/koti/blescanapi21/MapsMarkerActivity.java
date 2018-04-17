@@ -35,6 +35,7 @@ import android.R.layout;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -62,6 +63,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     private static String[] node;
     private static int koko;
     private static int markersize = 0;
+
 
 
     @Override
@@ -108,7 +110,8 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            //ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
             startService(new Intent(this, LocationFetch.class));
             startService(new Intent(this, BleScanner.class));
         } else {
@@ -120,18 +123,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
         }
 
-/*        //OLD MAIN BUTTON, USE LATER FOR LIST THE CONTENT OF DB IF POSSIBLE
-        Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                for (String[] node : nodes) {
-                    Log.d("JALAJALA", Arrays.toString(node));
-                }
-
-            }
-        });*/
     }
 
     protected void onResume() {
@@ -219,7 +210,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                         .position(node1)
                         .snippet(address)
                         .title(title));
-                map.moveCamera(CameraUpdateFactory.newLatLng(node1));
+                //map.moveCamera(CameraUpdateFactory.newLatLng(node1));
             }
         }
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -228,6 +219,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 String title = marker.getTitle();
                 marker.remove();
                 db.removeNode(title);
+                nodes = db.getData();
                 return true;
             }
         });
@@ -243,6 +235,14 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         return false;
     }
 
+
+    public static void updateOwnLocation(String latitude, String longitude){
+        double lat = Double.parseDouble(latitude);
+        double lon = Double.parseDouble(longitude);
+        LatLng latLng = new LatLng(lat, lon);
+        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        map.animateCamera(CameraUpdateFactory.zoomTo(15));
+    }
     //Metodin idea on lukea db.getData():lla tuoreimmat arvot ja verrata aiempiin onMapReadyssä() luettuihin
     //vertaa arvojen määrä nodes listoissa, jos isompi tässä, lue viimeiset ja paiskaa / korvaa (jos update) kartalle, päivitä nodes seuraavaan lukuun
     //tällä hetkellä metodia kutsutaan locationfetchin onlocationchangessa, eli aina ku gps arvot muuttuu
@@ -252,30 +252,31 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         DatabaseHandler db = new DatabaseHandler(MapsMarkerActivity.context);
         List<String[]> nodes2;
         nodes2 = db.getData();
-
+        int koko;
         //jossei haettu ole tyhjä
         if (nodes2 != null) {
 
             //hax jos vanha taulu on tyhja --> oletuskoko
             if (nodes == null) {
-                int koko = 0;
+                koko = 0;
+                Log.d("JALAJALA", "NODES NULL --> 0");
             }
             else {
-                int koko = nodes.size();
+                koko = nodes.size();
+                Log.d("JALAJALA", "NODES : NODES2 SIZE: " + koko + " : " + nodes2.size());
             }
             //jos tauluun lisätty nodeja, päivitetään map (vain näillä nodeilla)
             if(nodes2.size() > koko) {
 
                 //aloitetaan uuden taulun kahlaus indeksistä vanhan taulun koko ja jatketaan taulun loppuun
                 for (int apu = koko; apu < nodes2.size(); apu++) {
-                    Log.d("JALAJALA", "ADD_NEW_NODE");
+                    Log.d("JALAJALA", "ADD_NEW_NODE, DB ROW: " + apu);
 
                     String[] node2 = nodes2.get(apu);
                     String title = node2[0];
                     locNN = Double.parseDouble(node2[1]);
                     locEE = Double.parseDouble(node2[2]);
                     String address = node2[3];
-
 
                     Log.d("JALAJALA", String.valueOf(node2[3]));
 
@@ -285,12 +286,15 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                             .snippet(address)
                             .title(title)
                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                    map.moveCamera(CameraUpdateFactory.newLatLng(merkki));
+                   // map.moveCamera(CameraUpdateFactory.newLatLng(merkki));
                 }
              }
             nodes = nodes2;
         }
     }
+
+    //Create list of map marker objects and add object to list every time marker is created.
+    //scan through list to remove specific node instead of clearing all of them.
 
     //public static void upgradeCoordinates(String id, String nloc, String eloc, String address) {
     public static void updateLocation() {
@@ -300,35 +304,34 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         DatabaseHandler db = new DatabaseHandler(MapsMarkerActivity.context);
         List<String[]> nodes3;
         nodes3 = db.getData();
-        for (String[] node3 : nodes3) {
-            for (String[] node : nodes) {
-                if (node3 != node) {
-                    //String[] node3 = nodes3.get(Integer.parseInt(id));
-                    //Log.d("JALAJALA", Arrays.toString(node2));
+        String[] node3;
 
-                    /*String title = id;
-                    locNN = Double.parseDouble(nloc);
-                    locEE = Double.parseDouble(eloc);
-                    //String address = node3[3];*/
-                    String title = node3[0];
-                    locNN = Double.parseDouble(node3[1]);
-                    locEE = Double.parseDouble(node3[2]);
-                    String address = node3[3];
+        for (int i=0; i<nodes3.size(); i++){
+        //for (String[] node3 : nodes3) {
+            //for (String[] node : nodes) {
+            if (nodes3.get(i) != nodes.get(i)) {
+                node3 = nodes3.get((i));
+                String title = node3[0];
+                locNN = Double.parseDouble(node3[1]);
+                locEE = Double.parseDouble(node3[2]);
+                String address = node3[3];
 
-                    LatLng merkki3 = new LatLng(locNN, locEE);
-                    map.addMarker(new MarkerOptions()
-                            .position(merkki3)
-                            .snippet(address)
-                            .title(title)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
-                    map.moveCamera(CameraUpdateFactory.newLatLng(merkki3));
-                }
+                LatLng merkki3 = new LatLng(locNN, locEE);
+                map.addMarker(new MarkerOptions()
+                        .position(merkki3)
+                        .snippet(address)
+                        .title(title)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+                //map.moveCamera(CameraUpdateFactory.newLatLng(merkki3));
             }
         }
+        nodes = nodes3;
     }
 
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
 
     }
+
+
 }

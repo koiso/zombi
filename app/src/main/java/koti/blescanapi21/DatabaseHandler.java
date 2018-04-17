@@ -154,7 +154,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.close();
 
             MapsMarkerActivity.addNewNode();
-            Log.i("DatabaseHandler", "Added new node node to DB");
+            Log.i("DatabaseHandler", "Added new node to DB");
         }
         else{
             if (higherRSSI(address, rssi)) {
