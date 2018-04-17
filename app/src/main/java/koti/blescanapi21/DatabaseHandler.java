@@ -120,8 +120,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         //String m_id = cursor.getString(cursor.getColumnIndex(KEY_ID));
 
-        //MapsMarkerActivity.upgradeCoordinates(m_id, nloc, eloc, address);
-        MapsMarkerActivity.updateLocation();
+        MapsMarkerActivity.updateLocation(m_id, nloc, eloc, address);
+        //MapsMarkerActivity.updateLocation();
         //cursor2.close();
         db.close();
 

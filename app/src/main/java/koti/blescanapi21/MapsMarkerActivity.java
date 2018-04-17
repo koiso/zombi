@@ -34,10 +34,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import android.R.layout;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,6 +65,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     private static String[] node;
     private static int koko;
     private static int markersize = 0;
+    private static List<Marker> markers = new ArrayList<>();
 
 
 
@@ -72,7 +75,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         //locN = intententti.getStringExtra("locN");
         //locE = intententti.getStringExtra("locE");
         MapsMarkerActivity.context = getApplicationContext();
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
 
         // Retrieve the content view that renders the map.
@@ -122,7 +125,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
             startService(new Intent(this, BleScanner.class));
 
         }
-
     }
 
     protected void onResume() {
@@ -183,12 +185,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         map.setOnMyLocationButtonClickListener(this);
 
         final DatabaseHandler db = new DatabaseHandler(this);
-
-        //double locNN = Double.parseDouble(locN);
-        //double locEE = Double.parseDouble(locE);
-
-        //get nodes from database
-        //DatabaseHandler db = new DatabaseHandler(this);
         nodes = db.getData();
 
         if (nodes == null) {
@@ -198,19 +194,29 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
                 Log.d("JALAJALA", Arrays.toString(node));
 
+                //get values from list
                 String title = node[0];
                 locNN = Double.parseDouble(node[1]);
                 locEE = Double.parseDouble(node[2]);
                 String address = node[3];
 
-
-                //set markers from db
+                //create marker from values and add to map
                 LatLng node1 = new LatLng(locNN, locEE);
+                Marker marker;
+                marker = map.addMarker(new MarkerOptions()
+                        .position(node1)
+                        .snippet(address)
+                        .title(title));
+
+                //add marker to arraylist markers so it can be deleted later
+                markers.add(marker);
+
+                /*LatLng node1 = new LatLng(locNN, locEE);
                 map.addMarker(new MarkerOptions()
                         .position(node1)
                         .snippet(address)
                         .title(title));
-                //map.moveCamera(CameraUpdateFactory.newLatLng(node1));
+                map.moveCamera(CameraUpdateFactory.newLatLng(node1));*/
             }
         }
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -220,6 +226,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 marker.remove();
                 db.removeNode(title);
                 nodes = db.getData();
+                Toast.makeText(context, "Node removed from map and from DB", Toast.LENGTH_SHORT).show();
                 return true;
             }
         });
@@ -280,13 +287,17 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
                     Log.d("JALAJALA", String.valueOf(node2[3]));
 
-                    LatLng merkki = new LatLng(locNN, locEE);
-                    map.addMarker(new MarkerOptions()
-                            .position(merkki)
+                    //create marker from values and add to map
+                    LatLng node1 = new LatLng(locNN, locEE);
+                    Marker marker;
+                    marker = map.addMarker(new MarkerOptions()
+                            .position(node1)
                             .snippet(address)
-                            .title(title)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                   // map.moveCamera(CameraUpdateFactory.newLatLng(merkki));
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                            .title(title));
+
+                    //add marker to arraylist markers so it can be deleted later
+                    markers.add(marker);
                 }
              }
             nodes = nodes2;
@@ -296,10 +307,43 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     //Create list of map marker objects and add object to list every time marker is created.
     //scan through list to remove specific node instead of clearing all of them.
 
-    //public static void upgradeCoordinates(String id, String nloc, String eloc, String address) {
-    public static void updateLocation() {
-    //taulussa sama määrä nodeja, tarkastesetaan onko sijaintia korjattu ja päivitetään map
+    //UUSI YRITYS: LUETAAN LISÄTYT MARKERIT ARRAYLSITASTA markers
+    //poistetaan yksittäinen markkeri kartasta (jonka sijaintia on "parannettu") ja lisätään uusi markkeri
+    public static void updateLocation(String id, String nloc, String eloc, String address) {
         Log.d("JALAJALA", "UPDATE_NODE_LOCATION_ON_MAP");
+
+        //for (Marker mark : markers) {
+        for (Marker mark : new ArrayList<Marker>(markers)) {
+            //Log.d("JALAJALA", "MARK_TITLE / id = " + mark.getTitle() + " : " + id);
+            String title = mark.getTitle();
+            if (title.equals(id)) {
+                mark.remove();
+                markers.remove(mark);
+                Log.d("JALAJALA", "MARK REMOVED");
+            }
+            else{
+            }
+        }
+        String title = id;
+        locNN = Double.parseDouble(nloc);
+        locEE = Double.parseDouble(eloc);
+
+        //create marker from values and add to map
+        LatLng node1 = new LatLng(locNN, locEE);
+        Marker marker;
+        marker = map.addMarker(new MarkerOptions()
+                .position(node1)
+                .snippet(address)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE))
+                .title(title));
+
+        //add marker to arraylist markers so it can be deleted later
+        markers.add(marker);
+
+
+    //taulussa sama määrä nodeja, tarkastesetaan onko sijaintia korjattu ja päivitetään map
+        //public static void updateLocation() {
+        /*Log.d("JALAJALA", "UPDATE_NODE_LOCATION_ON_MAP");
         map.clear();
         DatabaseHandler db = new DatabaseHandler(MapsMarkerActivity.context);
         List<String[]> nodes3;
@@ -325,7 +369,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 //map.moveCamera(CameraUpdateFactory.newLatLng(merkki3));
             }
         }
-        nodes = nodes3;
+        nodes = nodes3;*/
     }
 
     @Override
