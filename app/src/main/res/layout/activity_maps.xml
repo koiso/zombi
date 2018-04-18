@@ -8,6 +8,6 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true"
 
-    map:cameraZoom="15"
+    map:cameraZoom="16"
 
     tools:context="koti.blescanapi21.MapsMarkerActivity" />

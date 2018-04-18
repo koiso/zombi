@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">BleScanApi21</string>
-    <string name="title_activity_maps">Map with Marker</string>
+    <string name="app_name">BLE beacon scanner</string>
+    <string name="title_activity_maps">BLE beacon scanner</string>
 </resources>

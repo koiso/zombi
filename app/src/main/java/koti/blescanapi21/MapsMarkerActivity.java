@@ -68,7 +68,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     private static List<Marker> markers = new ArrayList<>();
 
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //Intent intententti = getIntent();
@@ -248,7 +247,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         double lon = Double.parseDouble(longitude);
         LatLng latLng = new LatLng(lat, lon);
         map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        map.animateCamera(CameraUpdateFactory.zoomTo(15));
+        map.animateCamera(CameraUpdateFactory.zoomTo(16));
     }
     //Metodin idea on lukea db.getData():lla tuoreimmat arvot ja verrata aiempiin onMapReadyssä() luettuihin
     //vertaa arvojen määrä nodes listoissa, jos isompi tässä, lue viimeiset ja paiskaa / korvaa (jos update) kartalle, päivitä nodes seuraavaan lukuun

@@ -24,10 +24,12 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 public class BleScanner extends Service {
@@ -89,11 +91,34 @@ public class BleScanner extends Service {
             Log.d("JALAJALA: ", "ONSCANRESULT");
             BluetoothDevice bluetoothDevice = result.getDevice();
             ScanRecord sr = result.getScanRecord();
-            rssi = result.getRssi();
 
+            rssi = result.getRssi();
             deviceAddress = bluetoothDevice.getAddress();
+
+            //additional data from nodes for something
             String deviceName = sr.getDeviceName();
 
+            /*
+            SparseArray<byte[]> manu = sr.getManufacturerSpecificData();
+
+            if (manu != null) {
+                int size = manu.size();
+                for (int i = 0; i < size; i++) {
+
+                    int key = manu.keyAt(i);
+                    byte[] value = manu.valueAt(i);
+
+                    String content = "";
+                    try {
+                        content = new String(value, "ISO-8859-15");
+                    }
+                    catch(UnsupportedEncodingException e){
+                    }
+                    Log.i("TAG", "key: " + key + " value: " + content);
+                }
+            }
+            */
+            
             if (deviceName != null) {
                 Log.d("JALAJALA", deviceName);
             }

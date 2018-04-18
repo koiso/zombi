@@ -1,5 +1,6 @@
 package koti.blescanapi21;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
@@ -25,7 +26,8 @@ public class LocationFetch extends Service implements LocationListener {
     private Activity activity;
     protected LocationManager locationManager;
 
-    Location location;
+    Location locationNet;
+    Location locationGps;
     double latitude;
     double longitude;
 
@@ -61,7 +63,7 @@ public class LocationFetch extends Service implements LocationListener {
             Log.d("JALAJALA GPS_ON: ", String.valueOf(gps_on));
             Log.d("JALAJALA NET_ON: ", String.valueOf(net_on));
 
-            if (location == null) {
+            if (locationGps == null) {
                 Log.d("JALAJALA: ", "Location NULL");
 
                 if (gps_on) {
@@ -75,24 +77,34 @@ public class LocationFetch extends Service implements LocationListener {
                     Log.d("JALAJALA: ", "LocationManager NOT NULL");
 
                     if (gps_on) {
-                        location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                        locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
                     } else {
-                        location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     }
                     //NLOC = String.valueOf(location.getLatitude());
                     //ELOC = String.valueOf(location.getLongitude());
                     //sendResults();
 
-                    if (location != null) {
+                    if (locationGps != null) {
                         Log.d("JALAJALA: ", "Location NOT NULL");
                         //latitude = location.getLatitude();
                         //longitude = location.getLongitude();
-                        NLOC = String.valueOf(location.getLatitude());
-                        ELOC = String.valueOf(location.getLongitude());
-                        sendResults();
+                        NLOC = String.valueOf(locationGps.getLatitude());
+                        ELOC = String.valueOf(locationGps.getLongitude());
                     }
+
+                    //korjaa jos eka location (aiempi if) location == null (eli ei gps lokaatiota
+                    //niin käytä network lokaatiota
+                    else{
+                        Log.d("JALAJALA", "NETLOC");
+                        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
+                        locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        NLOC = String.valueOf(locationNet.getLatitude());
+                        ELOC = String.valueOf(locationNet.getLongitude());
+                    }
+                    sendResults();
                 }
             }
 
@@ -117,20 +129,39 @@ public class LocationFetch extends Service implements LocationListener {
 
 
     public double getLocN() {
-        if (location != null) {
-            latitude = location.getLatitude();
+        if (locationGps != null) {
+            latitude = locationGps.getLatitude();
         }
         return latitude;
     }
 
     public double getLocE() {
-        if (location != null) {
-            longitude = location.getLongitude();
+        if (locationGps != null) {
+            longitude = locationGps.getLongitude();
         }
         return longitude;
     }
 
+    @SuppressLint("MissingPermission")
     public void sendResults() {
+        locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        if (locationGps != null) {
+            Log.d("JALAJALA: ", "GPSLOC");
+            //latitude = location.getLatitude();
+            //longitude = location.getLongitude();
+            NLOC = String.valueOf(locationGps.getLatitude());
+            ELOC = String.valueOf(locationGps.getLongitude());
+        }
+
+        //korjaa jos eka location (aiempi if) location == null (eli ei gps lokaatiota
+        //niin käytä network lokaatiota
+        else{
+            Log.d("JALAJALA", "NETLOC");
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
+            locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            NLOC = String.valueOf(locationNet.getLatitude());
+            ELOC = String.valueOf(locationNet.getLongitude());
+        }
         Intent intent = new Intent("JALAEVENTNAME");
         //intent.putExtra("NLOC", String.valueOf(location.getLatitude()));
         //intent.putExtra("ELOC", String.valueOf(location.getLongitude()));
@@ -143,7 +174,7 @@ public class LocationFetch extends Service implements LocationListener {
     public void onLocationChanged(Location location) {
         String message = "N: " + location.getLatitude() + "\nE: " + location.getLongitude();
         //Toast.makeText(this.context, message, Toast.LENGTH_LONG).show();
-        Log.d("JALA", message);
+        //Log.d("JALA", message);
         NLOC = String.valueOf(location.getLatitude());
         ELOC = String.valueOf(location.getLongitude());
         sendResults();
