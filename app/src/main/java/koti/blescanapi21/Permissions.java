@@ -61,6 +61,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
 
         else{
             Toast.makeText(this , "location enabled", Toast.LENGTH_SHORT).show();
+            finish();
         }
 
     }
@@ -102,6 +103,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
             case REQUEST_FINE_LOCATION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     locationPermissionGranted = true;
+                    finish();
                     break;
                 }
                 else{
