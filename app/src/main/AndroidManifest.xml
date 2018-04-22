@@ -27,15 +27,16 @@
         <service
             android:name=".LocationFetch"
             android:enabled="true" />
-<!--
-        <activity android:name=".MainActivity">
-            <intent-filter>
+
+        <activity android:name=".Permissions">
+          <!--  <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
 -->
+        </activity>
+
         <activity
             android:name=".MapsMarkerActivity"
             android:configChanges="orientation|screenSize"

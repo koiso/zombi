@@ -60,7 +60,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     final static int BLUETOOTH_PERMISSION_REQUEST_CODE = 0;
 
     private static GoogleMap map;
-    private static Context context;
+    public static Context context;
     private static List<String[]> nodes;
     private static String[] node;
     private static int koko;
@@ -77,6 +77,11 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         super.onCreate(savedInstanceState);
 
+        //KOSKA JUSSI KÄSKI
+        Intent checkPermissions = new Intent(this, Permissions.class);
+        startActivity(checkPermissions);
+
+
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
 
@@ -86,6 +91,8 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+
+        /*
         //create crap for permissions
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
@@ -124,11 +131,19 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
             startService(new Intent(this, BleScanner.class));
 
         }
+        */
+        startService(new Intent(this, LocationFetch.class));
+        startService(new Intent(this, BleScanner.class));
+
+
+
     }
 
     protected void onResume() {
+
         super.onResume();
 
+                /*
         if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
             Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
@@ -155,6 +170,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
             //startService(new Intent(this, LocationFetch.class));
             //startService(new Intent(this, BleScanner.class));
         }
+        */
     }
 
 
