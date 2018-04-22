@@ -42,10 +42,6 @@ public class PahoClient extends Service implements MqttCallback{
             client = new MqttClient("tcp://iot.eclipse.org:1883", "pahomqttpublish1", persistence);
             client.connect();
 
-            //subscribe
-            client.setCallback(this);
-            client.subscribe("pahodemo/test");
-
             //publish
             MqttMessage message = new MqttMessage();
             message.setPayload("A single message".getBytes());
