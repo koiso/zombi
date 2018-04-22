@@ -93,6 +93,8 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        //for MQTT messages in
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("PAHO_MESSAGE"));
 
 
         /*
@@ -135,12 +137,23 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
         }
         */
+        startService(new Intent(this, PahoSubscribe.class));
         startService(new Intent(this, LocationFetch.class));
         startService(new Intent(this, BleScanner.class));
 
         startService(new Intent(this, PahoClient.class));
 
+
+
     }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("MESSAGE");
+            Log.d("PAHO_MESSAGE: ", message);
+        }
+    };
 
     protected void onResume() {
 
