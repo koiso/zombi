@@ -2,10 +2,14 @@ package koti.blescanapi21;
 
 
 import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,11 +25,14 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
     private static final int REQUEST_BLUETOOTH = 0;
     private static final int REQUEST_FINE_LOCATION = 1;
     private static final int REQUEST_INTERNET = 2;
+    private static final int REQUEST_WRITE = 3;
 
     private boolean locationPermissionGranted = false;
     private boolean bluetoothPermissionGranted = false;
     private boolean internetPermissionGranted = false;
 
+    private BluetoothAdapter mBluetoothAdapter;
+    private LocationManager locationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +41,8 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Marshmallow
             Toast.makeText(this , "checking runtime permissions..", Toast.LENGTH_SHORT).show();
             LocationPermission();
-            //BluetoothPermission();
+            WritePermission();
+            BluetoothPermission();
             //InternetPermission();
 
         }
@@ -48,7 +56,28 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
         }
     }
 
+    private void WritePermission() {
+        Toast.makeText(this , "checking write permissions..", Toast.LENGTH_SHORT).show();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                requestPermissions(new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE);
+            }
+        }
+
+        else{
+            Toast.makeText(this , "write enabled", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+    }
+
     private void LocationPermission(){
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Intent enableGpsintent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(enableGpsintent);
+        }
+
         Toast.makeText(this , "checking location permissions..", Toast.LENGTH_SHORT).show();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
@@ -67,6 +96,10 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
     }
 
     private void BluetoothPermission(){
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtintent, REQUEST_BLUETOOTH);
+        }
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) != PackageManager.PERMISSION_GRANTED){
 

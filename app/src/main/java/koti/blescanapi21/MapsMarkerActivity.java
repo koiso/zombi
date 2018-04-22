@@ -67,6 +67,9 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     private static int markersize = 0;
     private static List<Marker> markers = new ArrayList<>();
 
+    //paho testing
+    PahoClient paho;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +84,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         Intent checkPermissions = new Intent(this, Permissions.class);
         startActivity(checkPermissions);
 
-
         // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_maps);
 
@@ -90,6 +92,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
 
         /*
@@ -135,7 +138,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         startService(new Intent(this, LocationFetch.class));
         startService(new Intent(this, BleScanner.class));
 
-
+        startService(new Intent(this, PahoClient.class));
 
     }
 

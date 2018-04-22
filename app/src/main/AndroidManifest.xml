@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -50,6 +51,11 @@
 
         <service
             android:name=".BleScanner"
+            android:enabled="true"
+            android:exported="true"></service>
+
+        <service
+            android:name=".PahoClient"
             android:enabled="true"
             android:exported="true"></service>
     </application>
