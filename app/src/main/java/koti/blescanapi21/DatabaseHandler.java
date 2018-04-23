@@ -227,7 +227,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void insertSubscribedData(String nodeInfo){
         //this methods get nodeInfo string from pahoclient, parses it and insert it to DB if not already there.
-        
+        //String[] values = nodeInfo.split(",");
+        //Log.d("JALAJALA", values.toString());
+
 
     }
 

@@ -68,7 +68,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     private static List<Marker> markers = new ArrayList<>();
 
     //paho testing
-    PahoClient paho;
+    //PahoClient paho;
 
 
     @Override
@@ -137,14 +137,9 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
         }
         */
-        startService(new Intent(this, PahoClient.class));
         startService(new Intent(this, LocationFetch.class));
         startService(new Intent(this, BleScanner.class));
-
-        //startService(new Intent(this, PahoClient.class));
-
-
-
+        startService(new Intent(this, PahoClient.class));
     }
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {

@@ -43,7 +43,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
             LocationPermission();
             WritePermission();
             BluetoothPermission();
-            //InternetPermission();
+            InternetPermission();
 
         }
 
@@ -109,6 +109,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
 
             else{
                 Toast.makeText(this , "BT enabled", Toast.LENGTH_SHORT).show();
+                finish();
             }
 
         }
@@ -123,6 +124,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
 
             else{
                 Toast.makeText(this , "Internet enabled", Toast.LENGTH_SHORT).show();
+                finish();
             }
 
         }
