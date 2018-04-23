@@ -126,6 +126,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
 
         Log.i("DatabaseHandler", "Coordinates updated to DB (RSSI)");
+
+        //publishData with MQTT
+        publishData("update: " + address + ", " + rssi +  ", " + nloc +  ", " + eloc +  ", " + user);
     }
 
     public void addNode(String address, String rssi, String nloc, String eloc, String user) {
@@ -155,6 +158,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
             MapsMarkerActivity.addNewNode();
             Log.i("DatabaseHandler", "Added new node to DB");
+
+            //publishData with MQTT
+            publishData("addnode: " + address + ", " + rssi +  ", " + nloc +  ", " + eloc +  ", " + user);
         }
         else{
             if (higherRSSI(address, rssi)) {
@@ -212,6 +218,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String removeDBQuery =  "DELETE FROM " + TABLE_NAME + " WHERE id = '" + id + "'";
         db.execSQL(removeDBQuery);
         db.close();
+    }
+
+    public void publishData(String nodeInfo){
+        PahoClient paho = new PahoClient();
+        paho.sendData(nodeInfo);
+    }
+
+    public void insertSubscribedData(String nodeInfo){
+        //this methods get nodeInfo string from pahoclient, parses it and insert it to DB if not already there.
+        
+
     }
 
     public void clearDatabase(String TABLE_NAME) {

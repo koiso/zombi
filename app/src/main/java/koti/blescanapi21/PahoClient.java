@@ -87,8 +87,13 @@ public class PahoClient extends Service implements MqttCallback{
     @Override
     public void messageArrived(String topic, MqttMessage message)
             throws Exception {
-        //Toast.makeText(this, String.valueOf(message), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(context, String.valueOf(message), Toast.LENGTH_SHORT).show();
         Log.d("JALAJALA", "PAHO_MESSAGE: " + message);
+
+        //send here message back to databasehandler insertSubscribedData(String.valueOf(message))
+        //to be parsed and inserted to db if not already there (subscribed from another device).
+
+
     }
 
     @Override

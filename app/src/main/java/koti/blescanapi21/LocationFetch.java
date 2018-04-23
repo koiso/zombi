@@ -171,9 +171,9 @@ public class LocationFetch extends Service implements LocationListener {
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
         //test for paho
-        String pahoString = ELOC + " Testi " + NLOC;
-        PahoClient paho = new PahoClient();
-        paho.sendData(pahoString);
+        //String pahoString = ELOC + " Testi " + NLOC;
+        //PahoClient paho = new PahoClient();
+        //paho.sendData(pahoString);
     }
 
     public void onLocationChanged(Location location) {
