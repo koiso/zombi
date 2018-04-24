@@ -146,11 +146,21 @@ public class LocationFetch extends Service implements LocationListener {
     public void sendResults() {
         locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (locationGps != null) {
-            Log.d("JALAJALA: ", "GPSLOC");
-            //latitude = location.getLatitude();
-            //longitude = location.getLongitude();
-            NLOC = String.valueOf(locationGps.getLatitude());
-            ELOC = String.valueOf(locationGps.getLongitude());
+            if (NLOC != null && ELOC != null) {
+                Log.d("JALAJALA: ", "GPSLOC");
+                //latitude = location.getLatitude();
+                //longitude = location.getLongitude();
+                NLOC = String.valueOf(locationGps.getLatitude());
+                ELOC = String.valueOf(locationGps.getLongitude());
+            }
+            else{
+                Log.d("JALAJALA", "NETLOC");
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
+                locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                NLOC = String.valueOf(locationNet.getLatitude());
+                ELOC = String.valueOf(locationNet.getLongitude());
+            }
+
         }
 
         //korjaa jos eka location (aiempi if) location == null (eli ei gps lokaatiota
@@ -162,6 +172,7 @@ public class LocationFetch extends Service implements LocationListener {
             NLOC = String.valueOf(locationNet.getLatitude());
             ELOC = String.valueOf(locationNet.getLongitude());
         }
+
         Intent intent = new Intent("JALAEVENTNAME");
         //intent.putExtra("NLOC", String.valueOf(location.getLatitude()));
         //intent.putExtra("ELOC", String.valueOf(location.getLongitude()));

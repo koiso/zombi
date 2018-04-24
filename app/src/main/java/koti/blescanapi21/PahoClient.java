@@ -28,14 +28,15 @@ import java.util.Arrays;
 public class PahoClient extends Service implements MqttCallback{
 
     private Context context = MapsMarkerActivity.context;
-    MqttClient client;
-    MqttClient sub_client;
-    String nodeData = "testi," + "data," + "paketti," + "kannasta";
+    private MqttClient client;
+    private MqttClient sub_client;
+    private String nodeData = "testi," + "data," + "paketti," + "kannasta";
 
     //private String connAddress = "tcp://tutkasema.mine.nu:1883";
-    private String connAddress = "tcp://81.175.134.233:1883";
+    //private String connAddress = "tcp://81.175.134.233:1883";
     //private String connAddress = "tcp://192.168.0.113:1883";
     //private String connAddress = "tcp://test.mosquitto.org:1883";
+    private String connAddress = "tcp://iot.eclipse.org:1883";
 
     public PahoClient(){
 
@@ -49,34 +50,21 @@ public class PahoClient extends Service implements MqttCallback{
 
     public void onCreate() {
         Log.d("JALAJALA", "PAHO_ON_CREATE");
-/*
-        try {
-            Log.d("JALAJALA", "PAHO_CREATE_CLIENT");
-            MemoryPersistence persistence = new MemoryPersistence();
-            //client = new MqttClient("tcp://iot.eclipse.org:1883", "zombihommanid", persistence);
-            client = new MqttClient(connAddress, "zombihommanid2", persistence);
-            client.connect();
-
-            //client.disconnect();
-        }
-        catch (MqttException e) {
-            e.printStackTrace();
-            Log.d("JALAJALA", String.valueOf(e.getCause()));
-            Log.d("JALAJALA", String.valueOf(e.getMessage()));
-        }*/
         getData();
-        sendData(nodeData);
+        //sendData(nodeData);
     }
 
     public void onDestroy(){
         try {
             client.close();
+            sub_client.close();
         }
         catch (MqttException e) {
             e.printStackTrace();
             Log.d("JALAJALA", String.valueOf(e.getCause()));
             Log.d("JALAJALA", String.valueOf(e.getMessage()));
         }
+        super.onDestroy();
     }
 
     public void getData(){
@@ -88,7 +76,8 @@ public class PahoClient extends Service implements MqttCallback{
             //subscribe
             Log.d("JALAJALA", "PAHO_SUBSCRIBE");
             sub_client.setCallback(this);
-            sub_client.subscribe("zombihomman/testicase");
+            int subQos = 1;
+            sub_client.subscribe("zombihomman/testicase", subQos);
 
         }
         catch (MqttException e){
@@ -100,27 +89,18 @@ public class PahoClient extends Service implements MqttCallback{
 
     public void sendData(String testi) {
         try {
-            //Log.d("JALAJALA", "PAHO_CREATE_CLIENT");
             MemoryPersistence persistence = new MemoryPersistence();
-            //client = new MqttClient("tcp://iot.eclipse.org:1883", "zombihommanid", persistence);
             client = new MqttClient(connAddress, "zombihommanpub", persistence);
             client.connect();
-
-            //subscribe
-            //Log.d("JALAJALA", "PAHO_SUBSCRIBE");
-            //client.setCallback(this);
-            //client.subscribe("zombihomman/testicase");
 
              //publish
             Log.d("JALAJALA", "PAHO_PUBLISH");
             MqttMessage message = new MqttMessage();
-            //message.setPayload("A single message".getBytes());
-            //message.setPayload(nodeData.getBytes());
             message.setPayload(testi.getBytes());
 
             client.publish("zombihomman/testicase", message);
 
-            //client.disconnect();
+            client.disconnect();
 
         }
         catch (MqttException e) {
@@ -139,13 +119,12 @@ public class PahoClient extends Service implements MqttCallback{
     @Override
     public void messageArrived(String topic, MqttMessage message)
             throws Exception {
-        //Toast.makeText(context, String.valueOf(message), Toast.LENGTH_SHORT).show();
         Log.d("JALAJALA", "PAHO_MESSAGE: " + message);
 
         //send here message back to databasehandler insertSubscribedData(String.valueOf(message))
         //to be parsed and inserted to db if not already there (subscribed from another device).
-        //DatabaseHandler db = new DatabaseHandler(this);
-        //db.insertSubscribedData(String.valueOf(message));
+        DatabaseHandler db = new DatabaseHandler(this);
+        db.insertSubscribedData(String.valueOf(message));
 
     }
 

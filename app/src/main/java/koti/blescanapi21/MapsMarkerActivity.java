@@ -150,38 +150,17 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         }
     };
 
+    protected void onPause(){
+        super.onPause();
+    }
+    protected void onStop(){
+        super.onStop();
+    }
+    protected void onDestroy(){
+        super.onDestroy();
+    }
     protected void onResume() {
-
         super.onResume();
-
-                /*
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
-
-            if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
-            } else {
-            }
-
-        }
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Intent enableGpsintent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(enableGpsintent);
-        }
-
-        //If there is no rights for location:
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        } else {
-            Log.d("JALAJALA: ", "LOC OIKEUDET_ON");
-            //startService(new Intent(this, LocationFetch.class));
-            //startService(new Intent(this, BleScanner.class));
-        }
-        */
     }
 
 
@@ -276,6 +255,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         map.animateCamera(CameraUpdateFactory.zoomTo(16));
     }
+
     //Metodin idea on lukea db.getData():lla tuoreimmat arvot ja verrata aiempiin onMapReadyssä() luettuihin
     //vertaa arvojen määrä nodes listoissa, jos isompi tässä, lue viimeiset ja paiskaa / korvaa (jos update) kartalle, päivitä nodes seuraavaan lukuun
     //tällä hetkellä metodia kutsutaan locationfetchin onlocationchangessa, eli aina ku gps arvot muuttuu
@@ -329,6 +309,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
             nodes = nodes2;
         }
     }
+
 
     //Create list of map marker objects and add object to list every time marker is created.
     //scan through list to remove specific node instead of clearing all of them.

@@ -39,7 +39,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
         super.onCreate(savedInstanceState);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { // Marshmallow
-            Toast.makeText(this , "checking runtime permissions..", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this , "checking runtime permissions..", Toast.LENGTH_SHORT).show();
             LocationPermission();
             WritePermission();
             BluetoothPermission();
@@ -51,13 +51,13 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
             locationPermissionGranted = true;
             bluetoothPermissionGranted = true;
             internetPermissionGranted = true;
-            Toast.makeText(this , "permissions ok", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this , "permissions ok", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
 
     private void WritePermission() {
-        Toast.makeText(this , "checking write permissions..", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this , "checking write permissions..", Toast.LENGTH_SHORT).show();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -66,7 +66,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
         }
 
         else{
-            Toast.makeText(this , "write enabled", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this , "write enabled", Toast.LENGTH_SHORT).show();
             finish();
         }
     }
@@ -78,7 +78,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
             startActivity(enableGpsintent);
         }
 
-        Toast.makeText(this , "checking location permissions..", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this , "checking location permissions..", Toast.LENGTH_SHORT).show();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
 
@@ -89,7 +89,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
         }
 
         else{
-            Toast.makeText(this , "location enabled", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this , "location enabled", Toast.LENGTH_SHORT).show();
             finish();
         }
 
@@ -108,7 +108,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
             }
 
             else{
-                Toast.makeText(this , "BT enabled", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this , "BT enabled", Toast.LENGTH_SHORT).show();
                 finish();
             }
 
@@ -123,7 +123,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
             }
 
             else{
-                Toast.makeText(this , "Internet enabled", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this , "Internet enabled", Toast.LENGTH_SHORT).show();
                 finish();
             }
 
@@ -143,7 +143,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
                 }
                 else{
                     locationPermissionGranted = false;
-                    Toast.makeText(this , "service doesn't work without location", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this , "service doesn't work without location", Toast.LENGTH_SHORT).show();
                     break;
                 }
 
@@ -153,7 +153,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
                 }
                 else{
                     bluetoothPermissionGranted = false;
-                    Toast.makeText(this , "service doesn't work without BT", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this , "service doesn't work without BT", Toast.LENGTH_SHORT).show();
                     finishAndRemoveTask();
                 }
                 break;
@@ -164,7 +164,7 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
                 }
                 else{
                     internetPermissionGranted = false;
-                    Toast.makeText(this , "service doesn't work without internet access", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this , "service doesn't work without internet access", Toast.LENGTH_SHORT).show();
                     finishAndRemoveTask();
                 }
                 break;

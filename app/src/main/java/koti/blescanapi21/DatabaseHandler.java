@@ -7,7 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteTransactionListener;
 import android.util.Log;
+import android.widget.Toast;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +19,7 @@ import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
+    private Context context = MapsMarkerActivity.context;
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "ZombiDb";
     private static final String TABLE_NAME = "Zombi";
@@ -113,22 +116,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor2.close();
         db2.close();
 
-        //String selectQuery = "SELECT id FROM " + TABLE_NAME + " WHERE address = " + address;
-        //Cursor cursor2 = db.rawQuery(selectQuery, null);
-
-        //cursor.moveToFirst();
-
-        //String m_id = cursor.getString(cursor.getColumnIndex(KEY_ID));
-
         MapsMarkerActivity.updateLocation(m_id, nloc, eloc, address);
-        //MapsMarkerActivity.updateLocation();
-        //cursor2.close();
+
         db.close();
 
         Log.i("DatabaseHandler", "Coordinates updated to DB (RSSI)");
 
         //publishData with MQTT
-        publishData("update: " + address + ", " + rssi +  ", " + nloc +  ", " + eloc +  ", " + user);
+        //publishData("update: " + address + ", " + rssi +  ", " + nloc +  ", " + eloc +  ", " + user);
+        publishData(address + ", " + rssi +  ", " + nloc +  ", " + eloc +  ", " + user);
     }
 
     public void addNode(String address, String rssi, String nloc, String eloc, String user) {
@@ -160,7 +156,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             Log.i("DatabaseHandler", "Added new node to DB");
 
             //publishData with MQTT
-            publishData("addnode: " + address + ", " + rssi +  ", " + nloc +  ", " + eloc +  ", " + user);
+            //publishData("addnode: " + address + ", " + rssi +  ", " + nloc +  ", " + eloc +  ", " + user);
+            publishData(address + ", " + rssi +  ", " + nloc +  ", " + eloc +  ", " + user);
         }
         else{
             if (higherRSSI(address, rssi)) {
@@ -169,6 +166,73 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
         }
     }
+
+    public void updateSubNode(String address, String rssi, String nloc, String eloc, String user) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        String updateQuery = "UPDATE " + TABLE_NAME + " SET rssi = '" + rssi + "', nloc = '" + nloc + "', eloc = '" + eloc + "', user = '" + user + "'  WHERE address = '" + address + "'";
+
+        Cursor cursor = db.rawQuery(updateQuery, null);
+        cursor.moveToFirst();
+        cursor.close();
+        db.close();
+
+        //get id
+        SQLiteDatabase db2 = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
+        Cursor cursor2 = db2.rawQuery(selectQuery, null);
+        cursor2.moveToFirst();
+        String m_id = cursor2.getString(cursor2.getColumnIndex(KEY_ID));
+        //int m_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID)));
+
+        cursor2.close();
+        db2.close();
+
+        MapsMarkerActivity.updateLocation(m_id, nloc, eloc, address);
+
+        db.close();
+
+        Log.i("DatabaseHandler", "Coordinates updated to DB (RSSI)");
+    }
+
+    public void addSubNode(String address, String rssi, String nloc, String eloc, String user) {
+
+        // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan,
+        // jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
+
+        if (!checkNodeExists(address)) {
+
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues values = new ContentValues();
+
+            Log.d("DB_IN_ADDRESS", address);
+            Log.d("DB_IN_RSSI", rssi);
+            Log.d("DB_IN_NLOC", nloc);
+            Log.d("DB_IN_ELOC", eloc);
+            Log.d("DB_IN_USER", user);
+
+            values.put(ADDRESS, address);
+            values.put(RSSI, rssi);
+            values.put(NLOC, nloc);
+            values.put(ELOC, eloc);
+            values.put(USER, user);
+
+            db.insert(TABLE_NAME, null, values);
+            Log.i("DatabaseHandler", "Added new node to DB");
+            db.close();
+
+            MapsMarkerActivity.addNewNode();
+        }
+        else{
+            if (higherRSSI(address, rssi)) {
+                updateSubNode(address, rssi, nloc, eloc, user);
+                //Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
+            }
+        }
+    }
+
+
 
     public List<String[]> getData() {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -227,9 +291,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void insertSubscribedData(String nodeInfo){
         //this methods get nodeInfo string from pahoclient, parses it and insert it to DB if not already there.
-        //String[] values = nodeInfo.split(",");
-        //Log.d("JALAJALA", values.toString());
 
+        String[] values = nodeInfo.split(",");
+
+        /*for (String value : values) {
+            Log.d("JALAJALA", value);
+            //Toast.makeText(context, value, Toast.LENGTH_SHORT).show();
+
+        }*/
+
+        String address = values[0];
+        String rssi = values[1];
+        String nloc = values[2];
+        String eloc = values[3];
+        String user = values[4];
+
+        Log.d("JALAJALA", "DB_SUBI: " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
+
+        addSubNode(address, rssi, nloc, eloc, user);
 
     }
 
