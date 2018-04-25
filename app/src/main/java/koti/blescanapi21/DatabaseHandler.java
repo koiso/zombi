@@ -152,7 +152,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.insert(TABLE_NAME, null, values);
             db.close();
 
-            MapsMarkerActivity.addNewNode();
+            //get ID
+            SQLiteDatabase db2 = this.getReadableDatabase();
+            String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
+            Cursor cursor2 = db2.rawQuery(selectQuery, null);
+            cursor2.moveToFirst();
+            String m_id = cursor2.getString(cursor2.getColumnIndex(KEY_ID));
+            //int m_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID)));
+            cursor2.close();
+            db2.close();
+
+            //MapsMarkerActivity.addNewNode();
+            MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
             Log.i("DatabaseHandler", "Added new node to DB");
 
             //publishData with MQTT
@@ -189,7 +200,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor2.close();
         db2.close();
 
-        MapsMarkerActivity.updateLocation(m_id, nloc, eloc, address);
+        MapsMarkerActivity.updateSubLocation(m_id, nloc, eloc, address);
 
         db.close();
 
@@ -222,7 +233,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             Log.i("DatabaseHandler", "Added new node to DB");
             db.close();
 
-            MapsMarkerActivity.addNewNode();
+            //get ID
+            SQLiteDatabase db2 = this.getReadableDatabase();
+            String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
+            Cursor cursor2 = db2.rawQuery(selectQuery, null);
+            cursor2.moveToFirst();
+            String m_id = cursor2.getString(cursor2.getColumnIndex(KEY_ID));
+            //int m_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID)));
+            cursor2.close();
+            db2.close();
+
+            MapsMarkerActivity.addNewSubNode(m_id, address, rssi, nloc, eloc, user);
         }
         else{
             if (higherRSSI(address, rssi)) {

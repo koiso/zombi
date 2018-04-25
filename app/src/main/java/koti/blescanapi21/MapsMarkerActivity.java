@@ -96,47 +96,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         //for MQTT messages in
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("PAHO_MESSAGE"));
 
-
-        /*
-        //create crap for permissions
-        BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
-        //if bt not enabled, ask to enable it - and so on...
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Intent enableBtintent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtintent, REQUEST_ENABLE_BT);
-
-            if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, BLUETOOTH_PERMISSION_REQUEST_CODE);
-            } else {
-            }
-
-        }
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Intent enableGpsintent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-            startActivity(enableGpsintent);
-        }
-
-        //If there is no rights for location:
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            Log.d("JALAJALA: ", "LOC OIKEUS_CHECK");
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            //ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-            startService(new Intent(this, LocationFetch.class));
-            startService(new Intent(this, BleScanner.class));
-        } else {
-            //start services for location and ble info.
-            //location passes loc parameters to ble which passes them to db.
-            Log.d("JALAJALA: ", "LOC OIKEUDET_ON");
-            startService(new Intent(this, LocationFetch.class));
-            startService(new Intent(this, BleScanner.class));
-
-        }
-        */
         startService(new Intent(this, LocationFetch.class));
         startService(new Intent(this, BleScanner.class));
         startService(new Intent(this, PahoClient.class));
@@ -212,16 +171,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                         .position(node1)
                         .snippet(address)
                         .title(title));
-
-                //add marker to arraylist markers so it can be deleted later
-                markers.add(marker);
-
-                /*LatLng node1 = new LatLng(locNN, locEE);
-                map.addMarker(new MarkerOptions()
-                        .position(node1)
-                        .snippet(address)
-                        .title(title));
-                map.moveCamera(CameraUpdateFactory.newLatLng(node1));*/
             }
         }
         map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -238,7 +187,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         db.close();
     }
 
-
     @Override
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
@@ -246,7 +194,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         // (the camera animates to the user's current position).
         return false;
     }
-
 
     public static void updateOwnLocation(String latitude, String longitude){
         double lat = Double.parseDouble(latitude);
@@ -261,55 +208,24 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     //tällä hetkellä metodia kutsutaan locationfetchin onlocationchangessa, eli aina ku gps arvot muuttuu
     //siksi, että samalla voidaan passata gps koordinaatit tänne jotta kartta seuraa
     //vois tieten olla viisaampaa tehdä databasehandlerissa...
-    public static void addNewNode(){
-        DatabaseHandler db = new DatabaseHandler(MapsMarkerActivity.context);
-        List<String[]> nodes2;
-        nodes2 = db.getData();
-        int koko;
-        //jossei haettu ole tyhjä
-        if (nodes2 != null) {
 
-            //hax jos vanha taulu on tyhja --> oletuskoko
-            if (nodes == null) {
-                koko = 0;
-                Log.d("JALAJALA", "NODES NULL --> 0");
-            }
-            else {
-                koko = nodes.size();
-                Log.d("JALAJALA", "NODES : NODES2 SIZE: " + koko + " : " + nodes2.size());
-            }
-            //jos tauluun lisätty nodeja, päivitetään map (vain näillä nodeilla)
-            if(nodes2.size() > koko) {
+    public static void addNewNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
+        locNN = Double.parseDouble(nloc);
+        locEE = Double.parseDouble(eloc);
 
-                //aloitetaan uuden taulun kahlaus indeksistä vanhan taulun koko ja jatketaan taulun loppuun
-                for (int apu = koko; apu < nodes2.size(); apu++) {
-                    Log.d("JALAJALA", "ADD_NEW_NODE, DB ROW: " + apu);
+        String title = m_id;
+        //create marker from values and add to map
+        LatLng node1 = new LatLng(locNN, locEE);
+        Marker marker;
+        marker = map.addMarker(new MarkerOptions()
+                .position(node1)
+                .snippet(address)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                .title(title));
 
-                    String[] node2 = nodes2.get(apu);
-                    String title = node2[0];
-                    locNN = Double.parseDouble(node2[1]);
-                    locEE = Double.parseDouble(node2[2]);
-                    String address = node2[3];
-
-                    Log.d("JALAJALA", String.valueOf(node2[3]));
-
-                    //create marker from values and add to map
-                    LatLng node1 = new LatLng(locNN, locEE);
-                    Marker marker;
-                    marker = map.addMarker(new MarkerOptions()
-                            .position(node1)
-                            .snippet(address)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-                            .title(title));
-
-                    //add marker to arraylist markers so it can be deleted later
-                    markers.add(marker);
-                }
-             }
-            nodes = nodes2;
-        }
+        //add marker to arraylist markers so it can be deleted later
+        markers.add(marker);
     }
-
 
     //Create list of map marker objects and add object to list every time marker is created.
     //scan through list to remove specific node instead of clearing all of them.
@@ -327,8 +243,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 mark.remove();
                 markers.remove(mark);
                 Log.d("JALAJALA", "MARK REMOVED");
-            }
-            else{
+            } else {
             }
         }
         String title = id;
@@ -346,37 +261,57 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
         //add marker to arraylist markers so it can be deleted later
         markers.add(marker);
+    }
 
+    //add new node fetched from MQTT broker
+    public static void addNewSubNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
+        locNN = Double.parseDouble(nloc);
+        locEE = Double.parseDouble(eloc);
 
-    //taulussa sama määrä nodeja, tarkastesetaan onko sijaintia korjattu ja päivitetään map
-        //public static void updateLocation() {
-        /*Log.d("JALAJALA", "UPDATE_NODE_LOCATION_ON_MAP");
-        map.clear();
-        DatabaseHandler db = new DatabaseHandler(MapsMarkerActivity.context);
-        List<String[]> nodes3;
-        nodes3 = db.getData();
-        String[] node3;
+        String title = m_id;
+        //create marker from values and add to map
+        LatLng node1 = new LatLng(locNN, locEE);
+        Marker marker;
+        marker = map.addMarker(new MarkerOptions()
+                .position(node1)
+                .snippet(address)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                .title(title));
 
-        for (int i=0; i<nodes3.size(); i++){
-        //for (String[] node3 : nodes3) {
-            //for (String[] node : nodes) {
-            if (nodes3.get(i) != nodes.get(i)) {
-                node3 = nodes3.get((i));
-                String title = node3[0];
-                locNN = Double.parseDouble(node3[1]);
-                locEE = Double.parseDouble(node3[2]);
-                String address = node3[3];
+        //add marker to arraylist markers so it can be deleted later
+        markers.add(marker);
+    }
 
-                LatLng merkki3 = new LatLng(locNN, locEE);
-                map.addMarker(new MarkerOptions()
-                        .position(merkki3)
-                        .snippet(address)
-                        .title(title)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
-                //map.moveCamera(CameraUpdateFactory.newLatLng(merkki3));
+    //update node location fetched from MQTT broker
+    public static void updateSubLocation(String id, String nloc, String eloc, String address) {
+        Log.d("JALAJALA", "UPDATE_NODE_LOCATION_ON_MAP");
+
+        //for (Marker mark : markers) {
+        for (Marker mark : new ArrayList<Marker>(markers)) {
+            //Log.d("JALAJALA", "MARK_TITLE / id = " + mark.getTitle() + " : " + id);
+            String title = mark.getTitle();
+            if (title.equals(id)) {
+                mark.remove();
+                markers.remove(mark);
+                Log.d("JALAJALA", "MARK REMOVED");
+            } else {
             }
         }
-        nodes = nodes3;*/
+        String title = id;
+        locNN = Double.parseDouble(nloc);
+        locEE = Double.parseDouble(eloc);
+
+        //create marker from values and add to map
+        LatLng node1 = new LatLng(locNN, locEE);
+        Marker marker;
+        marker = map.addMarker(new MarkerOptions()
+                .position(node1)
+                .snippet(address)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE))
+                .title(title));
+
+        //add marker to arraylist markers so it can be deleted later
+        markers.add(marker);
     }
 
     @Override
