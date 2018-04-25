@@ -152,6 +152,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.insert(TABLE_NAME, null, values);
             db.close();
 
+
             //get ID
             SQLiteDatabase db2 = this.getReadableDatabase();
             String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
