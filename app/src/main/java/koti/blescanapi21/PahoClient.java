@@ -90,6 +90,8 @@ public class PahoClient extends Service implements MqttCallback{
     public void sendData(String testi) {
         try {
             MemoryPersistence persistence = new MemoryPersistence();
+
+            //maybe need to upgrade the clientid for new publishes
             client = new MqttClient(connAddress, "zombihommanpub", persistence);
             client.connect();
 

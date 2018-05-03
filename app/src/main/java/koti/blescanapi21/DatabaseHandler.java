@@ -263,6 +263,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String selectQuery = "SELECT * FROM " + TABLE_NAME + " ORDER BY id";
         Cursor cursor = db.rawQuery(selectQuery, null);
 
+
         // this is quick fix for bug which crashes if db is empty
         if (cursor.getCount() == 0) {
             return null;

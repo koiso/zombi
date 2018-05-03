@@ -88,7 +88,7 @@ public class BleScanner extends Service {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             //Log.d("JALAJALA: ", result.toString());
-            Log.d("JALAJALA: ", "ONSCANRESULT");
+            //Log.d("JALAJALA: ", "ONSCANRESULT");
             BluetoothDevice bluetoothDevice = result.getDevice();
             ScanRecord sr = result.getScanRecord();
 
@@ -120,13 +120,13 @@ public class BleScanner extends Service {
             */
             
             if (deviceName != null) {
-                Log.d("JALAJALA", deviceName);
+                //Log.d("JALAJALA", deviceName);
             }
             if (rssi != 0) {
-                Log.d("JALAJALA", String.valueOf(rssi));
+                //Log.d("JALAJALA", String.valueOf(rssi));
             }
             if (deviceAddress != null) {
-                Log.d("JALAJALA", String.valueOf(deviceAddress));
+                //Log.d("JALAJALA", String.valueOf(deviceAddress));
                 insertToDb(deviceAddress, rssi);
             }
         }

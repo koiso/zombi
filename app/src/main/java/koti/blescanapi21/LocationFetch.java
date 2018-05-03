@@ -80,8 +80,15 @@ public class LocationFetch extends Service implements LocationListener {
 
                     if (gps_on) {
                         locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                        lastGpsFix = locationGps.getTime();
-                        //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+
+                        try {
+                            //this time is last fixtime, format need to be converted and calculations made compared to current time = difference in millisekunneissa
+                            lastGpsFix = locationGps.getTime();
+                            //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        }
+                        catch (NullPointerException e) {
+                            Log.d("JALAJALA", String.valueOf(e));
+                        }
 
                     } else {
                         locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -151,7 +158,17 @@ public class LocationFetch extends Service implements LocationListener {
         locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (locationGps != null) {
             if (NLOC != null && ELOC != null) {
-                if (lastGpsFix < 5000) {
+                try {
+                    //this time is last fixtime, format need to be converted and calculations made compared to current time = difference in millisekunneissa
+                    lastGpsFix = locationGps.getTime();
+                    Log.d("JALAJALA", "GPSTIME:" + String.valueOf(lastGpsFix));
+                    //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                }
+                catch (NullPointerException e) {
+                    Log.d("JALAJALA", String.valueOf(e));
+                }
+
+                if (lastGpsFix < 10000) {
                     Log.d("JALAJALA: ", "GPSLOC");
                     //latitude = location.getLatitude();
                     //longitude = location.getLongitude();
