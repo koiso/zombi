@@ -94,7 +94,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         mapFragment.getMapAsync(this);
 
         //for MQTT messages in
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("PAHO_MESSAGE"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("PAHOMESSAGE"));
 
         startService(new Intent(this, LocationFetch.class));
         startService(new Intent(this, BleScanner.class));
@@ -104,16 +104,17 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         PahoSubscribe pahoSubscribe = new PahoSubscribe();
         pahoSubscribe.execute();
 
-        //PahoClient pahoclient = new PahoClient();
-        //pahoclient.execute();
     }
 
     //mikä tämä on ja miksi, tarvitaanko vielä
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("MESSAGE");
-            Log.d("PAHO_MESSAGE_MAP: ", message);
+            String r_id = intent.getStringExtra("ID");
+            String r_address = intent.getStringExtra("ADDRESS");
+            String r_nloc = intent.getStringExtra("NLOC");
+            String r_eloc = intent.getStringExtra("ELOC");
+            Log.d("PAHO_MESSAGE_MAP: ", r_id + r_address + r_nloc + r_eloc);
         }
     };
 
@@ -275,6 +276,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         locEE = Double.parseDouble(eloc);
 
         Log.d("JALAJALA", "MAP_ADD_NEW_SUBNODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
+        Toast.makeText(context, "ADDED NEW SUBNODE: " + address, Toast.LENGTH_SHORT).show();
 
         //testataan eikö vanhan markin vuoksi voi piirtä subnodea kun tulee samalta laitteela (luulatavasti turhaa)
 
@@ -289,6 +291,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
             }
         }
 
+
         String title = m_id;
         //create marker from values and add to map
         LatLng node1 = new LatLng(locNN, locEE);
@@ -301,6 +304,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
         //add marker to arraylist markers so it can be deleted later
         markers.add(marker);
+
 
     }
 

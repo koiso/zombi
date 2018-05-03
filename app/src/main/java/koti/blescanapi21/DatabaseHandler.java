@@ -118,7 +118,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor2.close();
         db2.close();
 
-        //tämä
+        //tämäkin on pois debuggauksen helpottamiseksi
         //MapsMarkerActivity.updateLocation(m_id, nloc, eloc, address);
 
         db.close();
@@ -166,9 +166,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             cursor2.close();
             db2.close();
 
-            //tämä
-            //MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
-            //MapsMarkerActivity.addNewSubNode(m_id, address, rssi, nloc, eloc, user);
+            //tämä kommentoitu koska mahdoton muuten testata yhdellä laitteella
+            MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
+
             Log.i("DatabaseHandler", "Added new node to DB");
 
             //publishData with MQTT
@@ -219,6 +219,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
 
         //tämän muutit jos vaikka address test kusee subilta tullessa, katso alempaaki else if
+        //ja muutenki pakko olla testailun vuoksi
         //if (!checkNodeExists(address)) {
 
             SQLiteDatabase db = this.getWritableDatabase();
@@ -245,7 +246,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
             Cursor cursor2 = db2.rawQuery(selectQuery, null);
             cursor2.moveToFirst();
+
             String m_id = cursor2.getString(cursor2.getColumnIndex(KEY_ID));
+
             //int m_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID)));
             cursor2.close();
             db2.close();

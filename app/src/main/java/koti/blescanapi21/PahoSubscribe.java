@@ -1,7 +1,10 @@
 package koti.blescanapi21;
 
+import android.app.Service;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -82,7 +85,7 @@ public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implem
 
         String payload = new String(message.getPayload());
 
-        /*testing for map problems with subnodes
+/*      testing for map problems with subnodes
         String[] values = payload.split(",");
 
         String address = values[0].replaceAll("\\s+","");
@@ -90,11 +93,22 @@ public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implem
         String nloc = values[2].replaceAll("\\s+","");
         String eloc = values[3].replaceAll("\\s+","");
         String user = values[4].replaceAll("\\s+","");
-        String m_id = "1001";
+        String id = "1001";
 
-        MapsMarkerActivity.addNewSubNode(m_id, address, rssi, nloc, eloc, user);
-        */
+        //MapsMarkerActivity.addNewSubNode(id, address, rssi, nloc, eloc, user);
 
+        //MOAR TESTING
+        Intent intent = new Intent("PAHOMESSAGE");
+        //intent.putExtra("NLOC", String.valueOf(location.getLatitude()));
+        //intent.putExtra("ELOC", String.valueOf(location.getLongitude()));
+        intent.putExtra("ID", id);
+        intent.putExtra("ADDRESS", address);
+        intent.putExtra("RSSI", rssi);
+        intent.putExtra("NLOC",nloc );
+        intent.putExtra("ELOC", eloc);
+
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+*/
         DatabaseHandler db = new DatabaseHandler(context);
         db.insertSubscribedData(String.valueOf(payload));
         this.message = message;

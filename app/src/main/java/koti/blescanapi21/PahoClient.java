@@ -74,32 +74,6 @@ public class PahoClient extends Service implements MqttCallback{
         super.onDestroy();
     }
 
-/*
-    public void getData(){
-        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
-        mqttConnectOptions.setKeepAliveInterval(60*5);
-        mqttConnectOptions.setCleanSession(false);
-
-        MemoryPersistence persistence = new MemoryPersistence();
-        try {
-            //sub_client = new MqttClient(connAddress, "zombihommansub", persistence);
-            sub_client = new MqttAsyncClient(connAddress, "zombihommansub", persistence);
-            sub_client.connect(mqttConnectOptions).waitForCompletion();
-
-            //subscribe
-            Log.d("JALAJALA", "PAHO_SUBSCRIBE");
-            sub_client.setCallback(this);
-            int subQos = 1;
-            sub_client.subscribe("zombihomman/testicase", subQos);
-
-        }
-        catch (MqttException e){
-            e.printStackTrace();
-            Log.d("JALAJALA", String.valueOf(e.getCause()));
-            Log.d("JALAJALA", String.valueOf(e.getMessage()));
-        }
-    }
-*/
 
     public static void sendData(String testi, int clientid) {
         try {
@@ -137,12 +111,12 @@ public class PahoClient extends Service implements MqttCallback{
     @Override
     public void messageArrived(String topic, MqttMessage message) throws Exception {
 
-        Log.d("JALAJALA", "PAHO_MESSAGE: " + message);
+        //Log.d("JALAJALA", "PAHO_MESSAGE: " + message);
 
         //send here message back to databasehandler insertSubscribedData(String.valueOf(message))
         //to be parsed and inserted to db if not already there (subscribed from another device).
-        DatabaseHandler db = new DatabaseHandler(this);
-        db.insertSubscribedData(String.valueOf(message));
+        //DatabaseHandler db = new DatabaseHandler(this);
+        //db.insertSubscribedData(String.valueOf(message));
 
     }
 
