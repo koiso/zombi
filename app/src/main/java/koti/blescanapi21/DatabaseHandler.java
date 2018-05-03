@@ -32,6 +32,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final String[] COLUMNS = { KEY_ID, ADDRESS, RSSI, NLOC, ELOC, USER };
 
+    int i = 0;
+
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -116,7 +118,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor2.close();
         db2.close();
 
-        MapsMarkerActivity.updateLocation(m_id, nloc, eloc, address);
+        //tämä
+        //MapsMarkerActivity.updateLocation(m_id, nloc, eloc, address);
 
         db.close();
 
@@ -163,8 +166,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             cursor2.close();
             db2.close();
 
-            //MapsMarkerActivity.addNewNode();
-            MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
+            //tämä
+            //MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
+            //MapsMarkerActivity.addNewSubNode(m_id, address, rssi, nloc, eloc, user);
             Log.i("DatabaseHandler", "Added new node to DB");
 
             //publishData with MQTT
@@ -180,6 +184,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void updateSubNode(String address, String rssi, String nloc, String eloc, String user) {
+        Log.d("JALAJALA", "UPDATE_SUB_NODE");
 
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -213,7 +218,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan,
         // jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
 
-        if (!checkNodeExists(address)) {
+        //tämän muutit jos vaikka address test kusee subilta tullessa, katso alempaaki else if
+        //if (!checkNodeExists(address)) {
 
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues values = new ContentValues();
@@ -244,14 +250,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             cursor2.close();
             db2.close();
 
+
+            //joku brokerin läpi tulleessa datassa ei täsmää tai sitte asyncistä lähtevä kutsu rikkoo piirron
             MapsMarkerActivity.addNewSubNode(m_id, address, rssi, nloc, eloc, user);
-        }
-        else{
-            if (higherRSSI(address, rssi)) {
-                updateSubNode(address, rssi, nloc, eloc, user);
-                //Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
-            }
-        }
+
+            //MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
+        //}
+        //else{
+        //    if (higherRSSI(address, rssi)) {
+        //        updateSubNode(address, rssi, nloc, eloc, user);
+        //        //Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
+        //    }
+        //}
     }
 
 
@@ -308,8 +318,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     public void publishData(String nodeInfo){
-        PahoClient paho = new PahoClient();
-        paho.sendData(nodeInfo);
+        //PahoClient paho = new PahoClient();
+        PahoClient.sendData(nodeInfo, i);
+        i++;
     }
 
     public void insertSubscribedData(String nodeInfo){
@@ -317,20 +328,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         String[] values = nodeInfo.split(",");
 
-        /*for (String value : values) {
-            Log.d("JALAJALA", value);
-            //Toast.makeText(context, value, Toast.LENGTH_SHORT).show();
+        String address = values[0].replaceAll("\\s+","");
+        String rssi = values[1].replaceAll("\\s+","");
+        String nloc = values[2].replaceAll("\\s+","");
+        String eloc = values[3].replaceAll("\\s+","");
+        String user = values[4].replaceAll("\\s+","");
 
-        }*/
+        //Log.d("JALAJALA", "PARSE_SUBI: " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
 
-        String address = values[0];
-        String rssi = values[1];
-        String nloc = values[2];
-        String eloc = values[3];
-        String user = values[4];
-
-        Log.d("JALAJALA", "DB_SUBI: " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
-
+        //tämä
         addSubNode(address, rssi, nloc, eloc, user);
 
     }

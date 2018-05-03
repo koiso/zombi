@@ -71,13 +71,13 @@ public class BleScanner extends Service {
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d("JALAJALA: ", "RECEIVER CHECK");
+            //Log.d("JALAJALA: ", "RECEIVER CHECK");
 
             locN = intent.getStringExtra("NLOC");
             locE = intent.getStringExtra("ELOC");
 
-            Log.d("JALAJALA: ", locN);
-            Log.d("JALAJALA: ", locE);
+            //Log.d("JALAJALA: ", locN);
+            //Log.d("JALAJALA: ", locE);
         }
     };
 

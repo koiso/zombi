@@ -37,13 +37,9 @@ public class LocationFetch extends Service implements LocationListener {
     private boolean gps_on = false;
     private boolean net_on = false;
 
-    private long lastGpsFix;
-
 /*
     public LocationFetch(){
-
     }
-
     public LocationFetch(Context context, Activity activity){
         this.context = context;
         this.activity = activity;
@@ -80,15 +76,7 @@ public class LocationFetch extends Service implements LocationListener {
 
                     if (gps_on) {
                         locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-                        try {
-                            //this time is last fixtime, format need to be converted and calculations made compared to current time = difference in millisekunneissa
-                            lastGpsFix = locationGps.getTime();
-                            //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        }
-                        catch (NullPointerException e) {
-                            Log.d("JALAJALA", String.valueOf(e));
-                        }
+                        //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
 
                     } else {
                         locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -97,8 +85,7 @@ public class LocationFetch extends Service implements LocationListener {
                     //ELOC = String.valueOf(location.getLongitude());
                     //sendResults();
 
-                    //if (locationGps != null) {
-                    if (lastGpsFix < 5000) {
+                    if (locationGps != null) {
                         Log.d("JALAJALA: ", "Location NOT NULL");
                         //latitude = location.getLatitude();
                         //longitude = location.getLongitude();
@@ -158,31 +145,20 @@ public class LocationFetch extends Service implements LocationListener {
         locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (locationGps != null) {
             if (NLOC != null && ELOC != null) {
-                try {
-                    //this time is last fixtime, format need to be converted and calculations made compared to current time = difference in millisekunneissa
-                    lastGpsFix = locationGps.getTime();
-                    Log.d("JALAJALA", "GPSTIME:" + String.valueOf(lastGpsFix));
-                    //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                }
-                catch (NullPointerException e) {
-                    Log.d("JALAJALA", String.valueOf(e));
-                }
-
-                if (lastGpsFix < 10000) {
-                    Log.d("JALAJALA: ", "GPSLOC");
-                    //latitude = location.getLatitude();
-                    //longitude = location.getLongitude();
-                    NLOC = String.valueOf(locationGps.getLatitude());
-                    ELOC = String.valueOf(locationGps.getLongitude());
-                }
-                else{
-                    Log.d("JALAJALA", "NETLOC");
-                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
-                    locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                    NLOC = String.valueOf(locationNet.getLatitude());
-                    ELOC = String.valueOf(locationNet.getLongitude());
-                }
+                //Log.d("JALAJALA: ", "GPSLOC");
+                //latitude = location.getLatitude();
+                //longitude = location.getLongitude();
+                NLOC = String.valueOf(locationGps.getLatitude());
+                ELOC = String.valueOf(locationGps.getLongitude());
             }
+            else{
+                Log.d("JALAJALA", "NETLOC");
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
+                locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                NLOC = String.valueOf(locationNet.getLatitude());
+                ELOC = String.valueOf(locationNet.getLongitude());
+            }
+
         }
 
         //korjaa jos eka location (aiempi if) location == null (eli ei gps lokaatiota
@@ -203,6 +179,10 @@ public class LocationFetch extends Service implements LocationListener {
 
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
+        //test for paho
+        //String pahoString = ELOC + " Testi " + NLOC;
+        //PahoClient paho = new PahoClient();
+        //paho.sendData(pahoString);
     }
 
     public void onLocationChanged(Location location) {
@@ -213,6 +193,8 @@ public class LocationFetch extends Service implements LocationListener {
         ELOC = String.valueOf(location.getLongitude());
         sendResults();
 
+        //MapsMarkerActivity maps = new MapsMarkerActivity();
+        //MapsMarkerActivity.upgradeMap();
         MapsMarkerActivity.updateOwnLocation(NLOC, ELOC);
 
     }

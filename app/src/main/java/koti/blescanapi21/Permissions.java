@@ -175,4 +175,5 @@ public class Permissions extends AppCompatActivity implements ActivityCompat.OnR
     protected void onStop() {
         super.onStop();
     }
+
 }

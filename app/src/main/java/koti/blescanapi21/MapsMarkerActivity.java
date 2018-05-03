@@ -99,13 +99,21 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         startService(new Intent(this, LocationFetch.class));
         startService(new Intent(this, BleScanner.class));
         startService(new Intent(this, PahoClient.class));
+
+        //testing for paho in asynctask
+        PahoSubscribe pahoSubscribe = new PahoSubscribe();
+        pahoSubscribe.execute();
+
+        //PahoClient pahoclient = new PahoClient();
+        //pahoclient.execute();
     }
 
+    //mikä tämä on ja miksi, tarvitaanko vielä
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("MESSAGE");
-            Log.d("PAHO_MESSAGE: ", message);
+            Log.d("PAHO_MESSAGE_MAP: ", message);
         }
     };
 
@@ -136,6 +144,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     public void onMapReady(GoogleMap googlemap) {
         Log.d("JALAJALA", "ONMAPREADY");
         map = googlemap;
+
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             if (Build.VERSION.SDK_INT >= 23) { // Marshmallow
@@ -203,13 +212,9 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         map.animateCamera(CameraUpdateFactory.zoomTo(16));
     }
 
-    //Metodin idea on lukea db.getData():lla tuoreimmat arvot ja verrata aiempiin onMapReadyssä() luettuihin
-    //vertaa arvojen määrä nodes listoissa, jos isompi tässä, lue viimeiset ja paiskaa / korvaa (jos update) kartalle, päivitä nodes seuraavaan lukuun
-    //tällä hetkellä metodia kutsutaan locationfetchin onlocationchangessa, eli aina ku gps arvot muuttuu
-    //siksi, että samalla voidaan passata gps koordinaatit tänne jotta kartta seuraa
-    //vois tieten olla viisaampaa tehdä databasehandlerissa...
 
     public static void addNewNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
+        Log.d("JALAJALA", "MAP ADD NEW NODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
         locNN = Double.parseDouble(nloc);
         locEE = Double.parseDouble(eloc);
 
@@ -220,7 +225,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         marker = map.addMarker(new MarkerOptions()
                 .position(node1)
                 .snippet(address)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                //.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                 .title(title));
 
         //add marker to arraylist markers so it can be deleted later
@@ -265,8 +270,24 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
     //add new node fetched from MQTT broker
     public static void addNewSubNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
+
         locNN = Double.parseDouble(nloc);
         locEE = Double.parseDouble(eloc);
+
+        Log.d("JALAJALA", "MAP_ADD_NEW_SUBNODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
+
+        //testataan eikö vanhan markin vuoksi voi piirtä subnodea kun tulee samalta laitteela (luulatavasti turhaa)
+
+        for (Marker mark : new ArrayList<Marker>(markers)) {
+            //Log.d("JALAJALA", "MARK_TITLE / id = " + mark.getTitle() + " : " + id);
+            String title = mark.getTitle();
+            if (title.equals(m_id)) {
+                mark.remove();
+                markers.remove(mark);
+                Log.d("JALAJALA", "MARK REMOVED FOR SUB");
+            } else {
+            }
+        }
 
         String title = m_id;
         //create marker from values and add to map
@@ -275,16 +296,17 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         marker = map.addMarker(new MarkerOptions()
                 .position(node1)
                 .snippet(address)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW))
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                 .title(title));
 
         //add marker to arraylist markers so it can be deleted later
         markers.add(marker);
+
     }
 
     //update node location fetched from MQTT broker
     public static void updateSubLocation(String id, String nloc, String eloc, String address) {
-        Log.d("JALAJALA", "UPDATE_NODE_LOCATION_ON_MAP");
+        Log.d("JALAJALA", "UPDATE_SUB_LOCATION_ON_MAP");
 
         //for (Marker mark : markers) {
         for (Marker mark : new ArrayList<Marker>(markers)) {
@@ -307,7 +329,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         marker = map.addMarker(new MarkerOptions()
                 .position(node1)
                 .snippet(address)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE))
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                 .title(title));
 
         //add marker to arraylist markers so it can be deleted later

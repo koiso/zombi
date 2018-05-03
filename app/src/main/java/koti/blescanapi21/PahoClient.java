@@ -16,27 +16,33 @@ import android.util.Log;
 import android.widget.Toast;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.util.Arrays;
+import java.util.Date;
 
 
 public class PahoClient extends Service implements MqttCallback{
 
     private Context context = MapsMarkerActivity.context;
-    private MqttClient client;
-    private MqttClient sub_client;
+    private static MqttClient client;
+    //private MqttClient sub_client;
+    private MqttAsyncClient sub_client;
     private String nodeData = "testi," + "data," + "paketti," + "kannasta";
 
     //private String connAddress = "tcp://tutkasema.mine.nu:1883";
-    //private String connAddress = "tcp://81.175.134.233:1883";
+    private static String connAddress = "tcp://81.175.134.233:1883";
     //private String connAddress = "tcp://192.168.0.113:1883";
     //private String connAddress = "tcp://test.mosquitto.org:1883";
-    private String connAddress = "tcp://iot.eclipse.org:1883";
+    //private static String connAddress = "tcp://iot.eclipse.org:1883";
+
+    int clientid = 0;
 
     public PahoClient(){
 
@@ -49,15 +55,16 @@ public class PahoClient extends Service implements MqttCallback{
     }
 
     public void onCreate() {
+
         Log.d("JALAJALA", "PAHO_ON_CREATE");
-        getData();
+        //getData();
         //sendData(nodeData);
     }
 
     public void onDestroy(){
         try {
             client.close();
-            sub_client.close();
+            //sub_client.close();
         }
         catch (MqttException e) {
             e.printStackTrace();
@@ -67,11 +74,17 @@ public class PahoClient extends Service implements MqttCallback{
         super.onDestroy();
     }
 
+/*
     public void getData(){
+        MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
+        mqttConnectOptions.setKeepAliveInterval(60*5);
+        mqttConnectOptions.setCleanSession(false);
+
         MemoryPersistence persistence = new MemoryPersistence();
         try {
-            sub_client = new MqttClient(connAddress, "zombihommansub", persistence);
-            sub_client.connect();
+            //sub_client = new MqttClient(connAddress, "zombihommansub", persistence);
+            sub_client = new MqttAsyncClient(connAddress, "zombihommansub", persistence);
+            sub_client.connect(mqttConnectOptions).waitForCompletion();
 
             //subscribe
             Log.d("JALAJALA", "PAHO_SUBSCRIBE");
@@ -86,22 +99,24 @@ public class PahoClient extends Service implements MqttCallback{
             Log.d("JALAJALA", String.valueOf(e.getMessage()));
         }
     }
+*/
 
-    public void sendData(String testi) {
+    public static void sendData(String testi, int clientid) {
         try {
             MemoryPersistence persistence = new MemoryPersistence();
 
             //maybe need to upgrade the clientid for new publishes
-            client = new MqttClient(connAddress, "zombihommanpub", persistence);
+            //client = new MqttClient(connAddress, "zombihommanpub", persistence);
+            client = new MqttClient(connAddress, String.valueOf(clientid), persistence);
             client.connect();
 
+
              //publish
-            Log.d("JALAJALA", "PAHO_PUBLISH");
+            Log.d("JALAJALA", "PAHO_PUBLISH: " + testi );
             MqttMessage message = new MqttMessage();
             message.setPayload(testi.getBytes());
 
             client.publish("zombihomman/testicase", message);
-
             client.disconnect();
 
         }
@@ -118,9 +133,10 @@ public class PahoClient extends Service implements MqttCallback{
 
     }
 
+
     @Override
-    public void messageArrived(String topic, MqttMessage message)
-            throws Exception {
+    public void messageArrived(String topic, MqttMessage message) throws Exception {
+
         Log.d("JALAJALA", "PAHO_MESSAGE: " + message);
 
         //send here message back to databasehandler insertSubscribedData(String.valueOf(message))
