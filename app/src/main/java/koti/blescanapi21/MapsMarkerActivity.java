@@ -99,10 +99,12 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         startService(new Intent(this, LocationFetch.class));
         startService(new Intent(this, BleScanner.class));
         startService(new Intent(this, PahoClient.class));
+        startService(new Intent(this, PahoSubscribe.class));
+
 
         //testing for paho in asynctask
-        PahoSubscribe pahoSubscribe = new PahoSubscribe();
-        pahoSubscribe.execute();
+        //PahoSubscribe pahoSubscribe = new PahoSubscribe();
+        //pahoSubscribe.execute();
 
     }
 
@@ -216,6 +218,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
     public static void addNewNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
         Log.d("JALAJALA", "MAP ADD NEW NODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
+        Toast.makeText(context, "ADDED NEW NODE: " + address, Toast.LENGTH_SHORT).show();
         locNN = Double.parseDouble(nloc);
         locEE = Double.parseDouble(eloc);
 
@@ -276,6 +279,8 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         locEE = Double.parseDouble(eloc);
 
         Log.d("JALAJALA", "MAP_ADD_NEW_SUBNODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
+
+        //miksei tämä toimi ja addnodessa toimii? tässä varmaan pulma....
         Toast.makeText(context, "ADDED NEW SUBNODE: " + address, Toast.LENGTH_SHORT).show();
 
         //testataan eikö vanhan markin vuoksi voi piirtä subnodea kun tulee samalta laitteela (luulatavasti turhaa)

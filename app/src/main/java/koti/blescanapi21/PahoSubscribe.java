@@ -4,6 +4,8 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -23,7 +25,8 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 
 
-public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implements MqttCallback {
+//public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implements MqttCallback {
+public class PahoSubscribe extends Service implements MqttCallback {
 
     //private String connAddress = "tcp://tutkasema.mine.nu:1883";
     private String connAddress = "tcp://81.175.134.233:1883";
@@ -31,8 +34,9 @@ public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implem
     //private String connAddress = "tcp://test.mosquitto.org:1883";
     //private static String connAddress = "tcp://iot.eclipse.org:1883";
 
-    private MqttAsyncClient sub_client;
-    private Context context = MapsMarkerActivity.context;
+    //private MqttAsyncClient sub_client;
+    private MqttClient sub_client;
+    //private Context context = MapsMarkerActivity.context;
     private MqttMessage message;
     private int i = 0;
 
@@ -45,11 +49,12 @@ public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implem
         MemoryPersistence persistence = new MemoryPersistence();
         try {
             Log.d("JALAJALA", "SUB_GET_DATA");
-            //sub_client = new MqttClient(connAddress, "zombihommansub", persistence);
-            sub_client = new MqttAsyncClient(connAddress, "zombihommansub", persistence);
+            sub_client = new MqttClient(connAddress, "zombihommansub", persistence);
+            //sub_client = new MqttAsyncClient(connAddress, "zombihommansub", persistence);
             //sub_client = new MqttAsyncClient(connAddress, String.valueOf(i), persistence);
             i++;
-            sub_client.connect(mqttConnectOptions).waitForCompletion();
+            //sub_client.connect(mqttConnectOptions).waitForCompletion();
+            sub_client.connect(mqttConnectOptions);
 
             //subscribe
             Log.d("JALAJALA", "PAHO_SUBSCRIBE");
@@ -65,11 +70,24 @@ public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implem
     }
 
     @Override
+    public void onCreate(){
+        getData();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startID){
+        super.onStartCommand(intent, flags, startID);
+        return START_STICKY;
+    }
+
+
+    /*
+    @Override
     protected MqttMessage doInBackground(String... strings) {
         getData();
         return message;
     }
-
+*/
     @Override
     public void connectionLost(Throwable cause) {
         Log.d("JALAJALA", "SUB_CONNECTION_LOST");
@@ -109,9 +127,9 @@ public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implem
 
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 */
-        DatabaseHandler db = new DatabaseHandler(context);
+        DatabaseHandler db = new DatabaseHandler(this);
         db.insertSubscribedData(String.valueOf(payload));
-        this.message = message;
+        //this.message = message;
         //sub_client.close();
 
     }
@@ -121,11 +139,18 @@ public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implem
 
     }
 
+    /*
     @Override
     protected void onPostExecute(MqttMessage message){
         Log.d("JALAJALA", "PAHOSUB ON POST");
         super.onPostExecute(message);
         getData();
 
+    }
+*/
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }

@@ -167,7 +167,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db2.close();
 
             //tämä kommentoitu koska mahdoton muuten testata yhdellä laitteella
-            MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
+            //MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
 
             Log.i("DatabaseHandler", "Added new node to DB");
 
