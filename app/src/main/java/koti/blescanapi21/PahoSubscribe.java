@@ -4,10 +4,13 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
@@ -17,6 +20,8 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+
+import static koti.blescanapi21.MapsMarkerActivity.context;
 
 
 /**
@@ -36,7 +41,7 @@ public class PahoSubscribe extends Service implements MqttCallback {
 
     //private MqttAsyncClient sub_client;
     private MqttClient sub_client;
-    //private Context context = MapsMarkerActivity.context;
+    private Context context = MapsMarkerActivity.context;
     private MqttMessage message;
     private int i = 0;
 
@@ -95,7 +100,16 @@ public class PahoSubscribe extends Service implements MqttCallback {
     }
 
     @Override
-    public void messageArrived(String topic, MqttMessage message) throws Exception {
+    public void messageArrived(String topic, final MqttMessage message) throws Exception {
+           Handler h = new Handler(Looper.getMainLooper());
+            h.post(new Runnable() {
+                @Override
+                public void run() {
+
+                    Toast.makeText(context, "MQTT Message:\n" +new String(message.getPayload()), Toast.LENGTH_SHORT).show();
+                }
+            });
+
         //Log.d("JALAJALA", "PAHO_MESSAGE: " + message);
 
         //send here message back to databasehandler insertSubscribedData(String.valueOf(message))
