@@ -99,9 +99,9 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         startService(new Intent(this, LocationFetch.class));
         startService(new Intent(this, BleScanner.class));
         startService(new Intent(this, PahoClient.class));
-        //startService(new Intent(this, PahoSubscribe.class));
-        PahoSubscribe paho = new PahoSubscribe();
-        paho.getData();
+        startService(new Intent(this, PahoSubscribe.class));
+        //PahoSubscribe paho = new PahoSubscribe();
+        //paho.getData();
 
         //testing for paho in asynctask
         //PahoSubscribe pahoSubscribe = new PahoSubscribe();

@@ -106,7 +106,10 @@ public class PahoSubscribe extends Service implements MqttCallback {
                 @Override
                 public void run() {
 
-                    Toast.makeText(context, "MQTT Message:\n" +new String(message.getPayload()), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "MQTT Message:\n" +new String(message.getPayload()), Toast.LENGTH_SHORT).show();
+                    String payload = new String(message.getPayload());
+                    DatabaseHandler db = new DatabaseHandler(context);
+                    db.insertSubscribedData(String.valueOf(payload));
                 }
             });
 
@@ -141,8 +144,8 @@ public class PahoSubscribe extends Service implements MqttCallback {
 
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
 */
-        DatabaseHandler db = new DatabaseHandler(this);
-        db.insertSubscribedData(String.valueOf(payload));
+        //DatabaseHandler db = new DatabaseHandler(this);
+        //db.insertSubscribedData(String.valueOf(payload));
         //this.message = message;
         //sub_client.close();
 
