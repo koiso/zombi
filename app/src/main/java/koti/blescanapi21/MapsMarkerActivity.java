@@ -193,6 +193,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 db.removeNode(title);
                 nodes = db.getData();
                 Toast.makeText(context, "Node removed from map and from DB", Toast.LENGTH_SHORT).show();
+
                 return true;
             }
         });
@@ -236,9 +237,43 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         markers.add(marker);
     }
 
+
+    //add new node fetched from MQTT broker
+    public static void addNewSubNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
+        Log.d("JALAJALA", "MAP_ADD_NEW_SUBNODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
+        Toast.makeText(context, "ADDED NEW SUBNODE: " + address, Toast.LENGTH_SHORT).show();
+
+        locNN = Double.parseDouble(nloc);
+        locEE = Double.parseDouble(eloc);
+
+        //testataan eikö vanhan markin vuoksi voi piirtä subnodea kun tulee samalta laitteela (luulatavasti turhaa)
+        for (Marker mark : new ArrayList<Marker>(markers)) {
+            //Log.d("JALAJALA", "MARK_TITLE / id = " + mark.getTitle() + " : " + id);
+            String title = mark.getTitle();
+            if (title.equals(m_id)) {
+                mark.remove();
+                markers.remove(mark);
+                Log.d("JALAJALA", "MARK REMOVED FOR SUB");
+            } else {
+            }
+        }
+
+        String title = m_id;
+        //create marker from values and add to map
+        LatLng node1 = new LatLng(locNN, locEE);
+        Marker marker;
+        marker = map.addMarker(new MarkerOptions()
+                .position(node1)
+                .snippet(address)
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                .title(title));
+
+        //add marker to arraylist markers so it can be deleted later
+        markers.add(marker);
+    }
+
     //Create list of map marker objects and add object to list every time marker is created.
     //scan through list to remove specific node instead of clearing all of them.
-
     //UUSI YRITYS: LUETAAN LISÄTYT MARKERIT ARRAYLSITASTA markers
     //poistetaan yksittäinen markkeri kartasta (jonka sijaintia on "parannettu") ja lisätään uusi markkeri
     public static void updateLocation(String id, String nloc, String eloc, String address) {
@@ -272,46 +307,6 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
         markers.add(marker);
     }
 
-    //add new node fetched from MQTT broker
-    public static void addNewSubNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
-
-        locNN = Double.parseDouble(nloc);
-        locEE = Double.parseDouble(eloc);
-
-        Log.d("JALAJALA", "MAP_ADD_NEW_SUBNODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
-
-        //miksei tämä toimi ja addnodessa toimii? tässä varmaan pulma....
-        Toast.makeText(context, "ADDED NEW SUBNODE: " + address, Toast.LENGTH_SHORT).show();
-
-        //testataan eikö vanhan markin vuoksi voi piirtä subnodea kun tulee samalta laitteela (luulatavasti turhaa)
-
-        for (Marker mark : new ArrayList<Marker>(markers)) {
-            //Log.d("JALAJALA", "MARK_TITLE / id = " + mark.getTitle() + " : " + id);
-            String title = mark.getTitle();
-            if (title.equals(m_id)) {
-                mark.remove();
-                markers.remove(mark);
-                Log.d("JALAJALA", "MARK REMOVED FOR SUB");
-            } else {
-            }
-        }
-
-
-        String title = m_id;
-        //create marker from values and add to map
-        LatLng node1 = new LatLng(locNN, locEE);
-        Marker marker;
-        marker = map.addMarker(new MarkerOptions()
-                .position(node1)
-                .snippet(address)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-                .title(title));
-
-        //add marker to arraylist markers so it can be deleted later
-        markers.add(marker);
-
-
-    }
 
     //update node location fetched from MQTT broker
     public static void updateSubLocation(String id, String nloc, String eloc, String address) {

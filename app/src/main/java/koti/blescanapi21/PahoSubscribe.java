@@ -90,7 +90,7 @@ public class PahoSubscribe extends Service implements MqttCallback {
 */
     @Override
     public void connectionLost(Throwable cause) {
-        Log.d("JALAJALA", "SUB_CONNECTION_LOST");
+        Log.d("JALAJALA", "SUB_CONNECTION_LOST" + String.valueOf(cause));
         getData();
     }
 
@@ -148,9 +148,9 @@ public class PahoSubscribe extends Service implements MqttCallback {
 
     }
 */
-    @Nullable
+
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }

@@ -183,6 +183,61 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
+
+    public void addSubNode(String address, String rssi, String nloc, String eloc, String user) {
+        // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan,
+        // jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
+
+        //tämän muutit jos vaikka address test kusee subilta tullessa, katso alempaaki else if
+        //ja muutenki pakko olla testailun vuoksi
+        //if (!checkNodeExists(address)) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        Log.d("DB_IN_ADDRESS", address);
+        Log.d("DB_IN_RSSI", rssi);
+        Log.d("DB_IN_NLOC", nloc);
+        Log.d("DB_IN_ELOC", eloc);
+        Log.d("DB_IN_USER", user);
+
+        values.put(ADDRESS, address);
+        values.put(RSSI, rssi);
+        values.put(NLOC, nloc);
+        values.put(ELOC, eloc);
+        values.put(USER, user);
+
+        db.insert(TABLE_NAME, null, values);
+        Log.i("DatabaseHandler", "Added new node to DB");
+        db.close();
+
+        //get ID
+        SQLiteDatabase db2 = this.getReadableDatabase();
+        String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
+        Cursor cursor2 = db2.rawQuery(selectQuery, null);
+        cursor2.moveToFirst();
+
+        String m_id = cursor2.getString(cursor2.getColumnIndex(KEY_ID));
+
+        //int m_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID)));
+        cursor2.close();
+        db2.close();
+
+
+        //joku brokerin läpi tulleessa datassa ei täsmää tai sitte asyncistä lähtevä kutsu rikkoo piirron
+        MapsMarkerActivity.addNewSubNode(m_id, address, rssi, nloc, eloc, user);
+
+        //MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
+        //}
+        //else{
+        //    if (higherRSSI(address, rssi)) {
+        //        updateSubNode(address, rssi, nloc, eloc, user);
+        //        //Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
+        //    }
+        //}
+    }
+
+
     public void updateSubNode(String address, String rssi, String nloc, String eloc, String user) {
         Log.d("JALAJALA", "UPDATE_SUB_NODE");
 
@@ -212,61 +267,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         Log.i("DatabaseHandler", "Coordinates updated to DB (RSSI)");
     }
-
-    public void addSubNode(String address, String rssi, String nloc, String eloc, String user) {
-
-        // tarkastaa et onko siellä jo deviceaddress. jos on, niin kattoo mikä rssi ja verrataan,
-        // jos lisättävän rssi on pienempi ku kannassa oleva, korvataan, muutoin ohitetaan
-
-        //tämän muutit jos vaikka address test kusee subilta tullessa, katso alempaaki else if
-        //ja muutenki pakko olla testailun vuoksi
-        //if (!checkNodeExists(address)) {
-
-            SQLiteDatabase db = this.getWritableDatabase();
-            ContentValues values = new ContentValues();
-
-            Log.d("DB_IN_ADDRESS", address);
-            Log.d("DB_IN_RSSI", rssi);
-            Log.d("DB_IN_NLOC", nloc);
-            Log.d("DB_IN_ELOC", eloc);
-            Log.d("DB_IN_USER", user);
-
-            values.put(ADDRESS, address);
-            values.put(RSSI, rssi);
-            values.put(NLOC, nloc);
-            values.put(ELOC, eloc);
-            values.put(USER, user);
-
-            db.insert(TABLE_NAME, null, values);
-            Log.i("DatabaseHandler", "Added new node to DB");
-            db.close();
-
-            //get ID
-            SQLiteDatabase db2 = this.getReadableDatabase();
-            String selectQuery = "SELECT * FROM " + TABLE_NAME + " WHERE address = '" + address + "'";
-            Cursor cursor2 = db2.rawQuery(selectQuery, null);
-            cursor2.moveToFirst();
-
-            String m_id = cursor2.getString(cursor2.getColumnIndex(KEY_ID));
-
-            //int m_id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(KEY_ID)));
-            cursor2.close();
-            db2.close();
-
-
-            //joku brokerin läpi tulleessa datassa ei täsmää tai sitte asyncistä lähtevä kutsu rikkoo piirron
-            MapsMarkerActivity.addNewSubNode(m_id, address, rssi, nloc, eloc, user);
-
-            //MapsMarkerActivity.addNewNode(m_id, address, rssi, nloc, eloc, user);
-        //}
-        //else{
-        //    if (higherRSSI(address, rssi)) {
-        //        updateSubNode(address, rssi, nloc, eloc, user);
-        //        //Log.i("Checknodeexists: ", Boolean.toString(checkNodeExists(address)));
-        //    }
-        //}
-    }
-
 
 
     public List<String[]> getData() {
