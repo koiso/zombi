@@ -193,7 +193,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
                 marker.remove();
                 db.removeNode(title);
                 nodes = db.getData();
-                Toast.makeText(context, "Node removed from map and from DB", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Node " + title + "removed from map and from DB", Toast.LENGTH_SHORT).show();
 
                 return true;
             }
@@ -220,7 +220,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
     public static void addNewNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
         Log.d("JALAJALA", "MAP ADD NEW NODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
-        Toast.makeText(context, "ADDED NEW NODE: " + address, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "FOUND NEW NODE: " + address, Toast.LENGTH_SHORT).show();
         locNN = Double.parseDouble(nloc);
         locEE = Double.parseDouble(eloc);
 
@@ -242,11 +242,12 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     //add new node fetched from MQTT broker
     public static void addNewSubNode(String m_id, String address, String rssi, String nloc, String eloc, String user){
         Log.d("JALAJALA", "MAP_ADD_NEW_SUBNODE:" + m_id + ", " + address + ", " + rssi + ", " + nloc + ", " + eloc + ", " + user);
-        Toast.makeText(context, "ADDED NEW SUBNODE: " + address, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "NEW SUBSCRIBED NODE: " + address, Toast.LENGTH_SHORT).show();
 
         locNN = Double.parseDouble(nloc);
         locEE = Double.parseDouble(eloc);
 
+        /*
         //testataan eikö vanhan markin vuoksi voi piirtä subnodea kun tulee samalta laitteela (luulatavasti turhaa)
         for (Marker mark : new ArrayList<Marker>(markers)) {
             //Log.d("JALAJALA", "MARK_TITLE / id = " + mark.getTitle() + " : " + id);
@@ -258,7 +259,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
             } else {
             }
         }
-
+*/
         String title = m_id;
         //create marker from values and add to map
         LatLng node1 = new LatLng(locNN, locEE);
@@ -278,7 +279,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     //UUSI YRITYS: LUETAAN LISÄTYT MARKERIT ARRAYLSITASTA markers
     //poistetaan yksittäinen markkeri kartasta (jonka sijaintia on "parannettu") ja lisätään uusi markkeri
     public static void updateLocation(String id, String nloc, String eloc, String address) {
-        Log.d("JALAJALA", "UPDATE_NODE_LOCATION_ON_MAP");
+        Log.d("JALAJALA", "UPDATED FOUND NODE LOCATION ON MAP");
 
         //for (Marker mark : markers) {
         for (Marker mark : new ArrayList<Marker>(markers)) {
@@ -311,7 +312,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
     //update node location fetched from MQTT broker
     public static void updateSubLocation(String id, String nloc, String eloc, String address) {
-        Log.d("JALAJALA", "UPDATE_SUB_LOCATION_ON_MAP");
+        Log.d("JALAJALA", "UPDATED SUBSCRIBED NODE LOCATION");
 
         //for (Marker mark : markers) {
         for (Marker mark : new ArrayList<Marker>(markers)) {

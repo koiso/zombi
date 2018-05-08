@@ -77,8 +77,8 @@ public class LocationFetch extends Service implements LocationListener {
                     if (gps_on) {
                         locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                         //location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-                    } else {
+                    }
+                    else {
                         locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                     }
                     //NLOC = String.valueOf(location.getLatitude());
@@ -97,8 +97,8 @@ public class LocationFetch extends Service implements LocationListener {
                     //niin käytä network lokaatiota
                     else{
                         Log.d("JALAJALA", "NETLOC");
-                        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
-                        locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
+                        //locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                         NLOC = String.valueOf(locationNet.getLatitude());
                         ELOC = String.valueOf(locationNet.getLongitude());
                     }
@@ -144,14 +144,13 @@ public class LocationFetch extends Service implements LocationListener {
     public void sendResults() {
         locationGps = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
         if (locationGps != null) {
-            if (NLOC != null && ELOC != null) {
-                //Log.d("JALAJALA: ", "GPSLOC");
-                //latitude = location.getLatitude();
-                //longitude = location.getLongitude();
+            try {
+                Log.d("JALAJALA", "GPSLOC");
                 NLOC = String.valueOf(locationGps.getLatitude());
                 ELOC = String.valueOf(locationGps.getLongitude());
             }
-            else{
+            catch (NullPointerException e) {
+                Log.d("JALAJALA", "LOCATION NULL: " + String.valueOf(e));
                 Log.d("JALAJALA", "NETLOC");
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
                 locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
@@ -159,10 +158,15 @@ public class LocationFetch extends Service implements LocationListener {
                 ELOC = String.valueOf(locationNet.getLongitude());
             }
 
+            /*
+            if (latitude != null && longitude != null) {
+                //Log.d("JALAJALA: ", "GPSLOC");
+                //latitude = location.getLatitude();
+                //longitude = location.getLongitude();
+                NLOC = String.valueOf(locationGps.getLatitude());
+                ELOC = String.valueOf(locationGps.getLongitude());
+            }*/
         }
-
-        //korjaa jos eka location (aiempi if) location == null (eli ei gps lokaatiota
-        //niin käytä network lokaatiota
         else{
             Log.d("JALAJALA", "NETLOC");
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
