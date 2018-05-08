@@ -21,6 +21,10 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 import static koti.blescanapi21.MapsMarkerActivity.context;
 
 
@@ -33,6 +37,7 @@ import static koti.blescanapi21.MapsMarkerActivity.context;
 //public class PahoSubscribe extends AsyncTask<String, String, MqttMessage> implements MqttCallback {
 public class PahoSubscribe extends Service implements MqttCallback {
 
+    //private String connAddress;
     //private String connAddress = "tcp://tutkasema.mine.nu:1883";
     private String connAddress = "tcp://81.175.134.233:1883";
     //private String connAddress = "tcp://192.168.0.113:1883";
@@ -43,7 +48,12 @@ public class PahoSubscribe extends Service implements MqttCallback {
     private MqttClient sub_client;
     private Context context = MapsMarkerActivity.context;
     private MqttMessage message;
-    private int i = 0;
+
+
+    @Override
+    public void onCreate(){
+        getData();
+    }
 
     public void getData(){
         MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
@@ -57,7 +67,6 @@ public class PahoSubscribe extends Service implements MqttCallback {
             sub_client = new MqttClient(connAddress, "zombihommansub", persistence);
             //sub_client = new MqttAsyncClient(connAddress, "zombihommansub", persistence);
             //sub_client = new MqttAsyncClient(connAddress, String.valueOf(i), persistence);
-            i++;
             //sub_client.connect(mqttConnectOptions).waitForCompletion();
             sub_client.connect(mqttConnectOptions);
 
@@ -68,16 +77,13 @@ public class PahoSubscribe extends Service implements MqttCallback {
             sub_client.setCallback(this);
         }
         catch (MqttException e){
-            e.printStackTrace();
             Log.d("JALAJALA", String.valueOf(e.getCause()));
             Log.d("JALAJALA", String.valueOf(e.getMessage()));
+
         }
     }
 
-    @Override
-    public void onCreate(){
-        getData();
-    }
+
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startID){
@@ -112,43 +118,6 @@ public class PahoSubscribe extends Service implements MqttCallback {
                     db.insertSubscribedData(String.valueOf(payload));
                 }
             });
-
-        //Log.d("JALAJALA", "PAHO_MESSAGE: " + message);
-
-        //send here message back to databasehandler insertSubscribedData(String.valueOf(message))
-        //to be parsed and inserted to db if not already there (subscribed from another device).
-
-        String payload = new String(message.getPayload());
-
-/*      testing for map problems with subnodes
-        String[] values = payload.split(",");
-
-        String address = values[0].replaceAll("\\s+","");
-        String rssi = values[1].replaceAll("\\s+","");
-        String nloc = values[2].replaceAll("\\s+","");
-        String eloc = values[3].replaceAll("\\s+","");
-        String user = values[4].replaceAll("\\s+","");
-        String id = "1001";
-
-        //MapsMarkerActivity.addNewSubNode(id, address, rssi, nloc, eloc, user);
-
-        //MOAR TESTING
-        Intent intent = new Intent("PAHOMESSAGE");
-        //intent.putExtra("NLOC", String.valueOf(location.getLatitude()));
-        //intent.putExtra("ELOC", String.valueOf(location.getLongitude()));
-        intent.putExtra("ID", id);
-        intent.putExtra("ADDRESS", address);
-        intent.putExtra("RSSI", rssi);
-        intent.putExtra("NLOC",nloc );
-        intent.putExtra("ELOC", eloc);
-
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-*/
-        //DatabaseHandler db = new DatabaseHandler(this);
-        //db.insertSubscribedData(String.valueOf(payload));
-        //this.message = message;
-        //sub_client.close();
-
     }
 
     @Override

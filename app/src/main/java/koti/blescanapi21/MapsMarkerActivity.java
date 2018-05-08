@@ -190,10 +190,11 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
             @Override
             public boolean onMarkerClick(Marker marker) {
                 String title = marker.getTitle();
+                String snippet = marker.getSnippet();
                 marker.remove();
                 db.removeNode(title);
                 nodes = db.getData();
-                Toast.makeText(context, "Node " + title + "removed from map and from DB", Toast.LENGTH_SHORT).show();
+                Toast.makeText(context, "Node " + snippet + " removed from map and from DB", Toast.LENGTH_SHORT).show();
 
                 return true;
             }
@@ -236,6 +237,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
         //add marker to arraylist markers so it can be deleted later
         markers.add(marker);
+        map.moveCamera(CameraUpdateFactory.newLatLng(node1));
     }
 
 
@@ -272,6 +274,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
 
         //add marker to arraylist markers so it can be deleted later
         markers.add(marker);
+        map.moveCamera(CameraUpdateFactory.newLatLng(node1));
     }
 
     //Create list of map marker objects and add object to list every time marker is created.
@@ -279,7 +282,7 @@ public class MapsMarkerActivity extends AppCompatActivity implements OnMapReadyC
     //UUSI YRITYS: LUETAAN LISÄTYT MARKERIT ARRAYLSITASTA markers
     //poistetaan yksittäinen markkeri kartasta (jonka sijaintia on "parannettu") ja lisätään uusi markkeri
     public static void updateLocation(String id, String nloc, String eloc, String address) {
-        Log.d("JALAJALA", "UPDATED FOUND NODE LOCATION ON MAP");
+        Log.d("JALAJALA", "UPDATED FOUND NODE LOCATION");
 
         //for (Marker mark : markers) {
         for (Marker mark : new ArrayList<Marker>(markers)) {
