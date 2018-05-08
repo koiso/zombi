@@ -32,8 +32,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final String[] COLUMNS = { KEY_ID, ADDRESS, RSSI, NLOC, ELOC, USER };
 
-    int i = 0;
-
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -320,8 +318,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void publishData(String nodeInfo){
         //PahoClient paho = new PahoClient();
-        PahoClient.sendData(nodeInfo, i);
-        i++;
+        PahoClient.sendData(nodeInfo);
     }
 
     public void insertSubscribedData(String nodeInfo){

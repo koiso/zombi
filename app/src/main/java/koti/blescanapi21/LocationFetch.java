@@ -99,8 +99,8 @@ public class LocationFetch extends Service implements LocationListener {
                         Log.d("JALAJALA", "NETLOC");
                         //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
                         //locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        NLOC = String.valueOf(locationNet.getLatitude());
-                        ELOC = String.valueOf(locationNet.getLongitude());
+                        //NLOC = String.valueOf(locationNet.getLatitude());
+                        //ELOC = String.valueOf(locationNet.getLongitude());
                     }
                     sendResults();
                 }
@@ -152,10 +152,10 @@ public class LocationFetch extends Service implements LocationListener {
             catch (NullPointerException e) {
                 Log.d("JALAJALA", "LOCATION NULL: " + String.valueOf(e));
                 Log.d("JALAJALA", "NETLOC");
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
-                locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                NLOC = String.valueOf(locationNet.getLatitude());
-                ELOC = String.valueOf(locationNet.getLongitude());
+                //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
+                //locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                //NLOC = String.valueOf(locationNet.getLatitude());
+                //ELOC = String.valueOf(locationNet.getLongitude());
             }
 
             /*
@@ -168,11 +168,11 @@ public class LocationFetch extends Service implements LocationListener {
             }*/
         }
         else{
-            Log.d("JALAJALA", "NETLOC");
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
-            locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-            NLOC = String.valueOf(locationNet.getLatitude());
-            ELOC = String.valueOf(locationNet.getLongitude());
+            //Log.d("JALAJALA", "NETLOC");
+            //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 2000, 10, this);
+            //locationNet = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+            //NLOC = String.valueOf(locationNet.getLatitude());
+            //ELOC = String.valueOf(locationNet.getLongitude());
         }
 
         Intent intent = new Intent("JALAEVENTNAME");

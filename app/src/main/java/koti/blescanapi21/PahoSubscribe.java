@@ -64,7 +64,8 @@ public class PahoSubscribe extends Service implements MqttCallback {
         MemoryPersistence persistence = new MemoryPersistence();
         try {
             Log.d("JALAJALA", "SUB_GET_DATA");
-            sub_client = new MqttClient(connAddress, "zombihommansub", persistence);
+            //sub_client = new MqttClient(connAddress, "zombihommansub", persistence);
+            sub_client = new MqttClient(connAddress, MqttClient.generateClientId(), persistence);
             //sub_client = new MqttAsyncClient(connAddress, "zombihommansub", persistence);
             //sub_client = new MqttAsyncClient(connAddress, String.valueOf(i), persistence);
             //sub_client.connect(mqttConnectOptions).waitForCompletion();
